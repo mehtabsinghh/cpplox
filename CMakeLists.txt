@@ -3,9 +3,15 @@ project(cpplox)
 
 set(CMAKE_CXX_STANDARD 17)
 
+# Include directories
+include_directories(include)
+
 # Add your source files here
 set(SOURCES
-    main.cpp
+    src/main.cpp
+    src/Lox.cpp 
+    src/Scanner.cpp 
+    src/Token.cpp
     # Add more source files here if needed
 )
 
