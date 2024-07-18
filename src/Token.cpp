@@ -8,5 +8,6 @@ std::string Token::toString() const {
     } else {
         result += *static_cast<std::string*>(literal.get());
     };
+    result += '\n';
     return result;
 }
