@@ -56,6 +56,7 @@ void Scanner::scanToken() {
 
     // Checks for the type of token
     switch (c) {
+        // Single character tokens
         case '(': addToken(TokenType::LEFT_PAREN); break;
         case ')': addToken(TokenType::RIGHT_PAREN); break;
         case '{': addToken(TokenType::LEFT_BRACE); break;
@@ -66,6 +67,7 @@ void Scanner::scanToken() {
         case '+': addToken(TokenType::PLUS); break;
         case ';': addToken(TokenType::SEMICOLON); break;
         case '*': addToken(TokenType::STAR); break;
+        // Two character tokens
         case '!':
             addToken(match('=') ? TokenType::BANG_EQUAL : TokenType::BANG);
             break;
@@ -78,14 +80,32 @@ void Scanner::scanToken() {
         case '>':
             addToken(match('=') ? TokenType::GREATER_EQUAL :TokenType::GREATER);
             break;
+        // Comments
         case '/':
             if (match('/')) {
                 // If the current character is a comment, then ignore the rest of the line
                 while (peek() != '\n' && !isAtEnd()) advance();
-            } else {
+            } else if (match('*')) {
+                // If the current character is a block comment, then ignore the rest of the block comment
+                while (peek() != '*' && peekNext() != '/' && !isAtEnd()) {
+                    if (peek() == '\n') line++;
+                    advance();
+                }
+
+                if (isAtEnd()) {
+                    Lox::error(line, "Unterminated block comment.");
+                    return;
+                }
+
+                // Consume the closing */
+                advance();
+                advance();
+            }
+            else {
                 addToken(TokenType::SLASH);
             }
             break;
+        // Whitespace
         case ' ':
         case '\r':
         case '\t':
@@ -95,6 +115,7 @@ void Scanner::scanToken() {
             line++;
             break;
         case '"': string(); break;
+        // Literals
         default:
             if (isDigit(c)) {
                 number();
