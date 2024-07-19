@@ -21,10 +21,10 @@ public:
 
 class Grouping : public Expr {
 public:
-    Expr expression;
+    std::unique_ptr<Expr> expression;
 
-    Grouping(Expr expression)
-        : expression(expression) {}
+    Grouping(std::unique_ptr<Expr> expression)
+        : expression(std::move(expression)) {}
 };
 
 class Literal : public Expr {
@@ -38,10 +38,10 @@ public:
 class Unary : public Expr {
 public:
     Token op;
-    Expr right;
+    std::unique_ptr<Expr> right;
 
-    Unary(Token op, Expr right)
-        : op(op), right(right) {}
+    Unary(Token op, std::unique_ptr<Expr> right)
+        : op(op), right(std::move(right)) {}
 };
 
 #endif
