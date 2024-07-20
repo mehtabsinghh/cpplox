@@ -18,7 +18,7 @@ void AstPrinter::visitGrouping (const Grouping& Expr) {
 }
 
 /* TODO:
-    Does not work, add cases for different types of literals
+    Does not work, add cases for different types of literals (int, double, string, etc.)
 */
 void AstPrinter::visitLiteral (const Literal& Expr) {
     if (Expr.value == nullptr) {
