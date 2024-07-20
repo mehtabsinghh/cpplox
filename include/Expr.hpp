@@ -4,6 +4,11 @@
 #include <memory>
 #include "Token.hpp"
 
+class Binary ;
+class Grouping ;
+class Literal ;
+class Unary ;
+
 class ExprVisitor {
 public:
     virtual void visitBinary (const Binary & Expr) = 0;
