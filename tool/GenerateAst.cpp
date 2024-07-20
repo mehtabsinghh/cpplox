@@ -28,12 +28,11 @@ std::vector<std::string> split(const std::string& str, const std::string& delim)
 }
 
 void defineVisitor(std::ofstream& file, const std::string& baseName, const std::vector<std::string>& types) {
-    file << "template<typename R>\n";
     file << "class " << baseName << "Visitor {\n";
     file << "public:\n";
     for (const std::string& type : types) {
         const std::string typeName = type.substr(0, type.find(":"));
-        file << "    virtual R visit" << typeName << "(const " << typeName << "& " << baseName << ") = 0;\n";
+        file << "    virtual void visit" << typeName << "(const " << typeName << "& " << baseName << ") = 0;\n";
     }
     file << "};\n";
     file << "\n";
@@ -73,11 +72,10 @@ void defineType(std::ofstream& file, const std::string& baseName, const std::str
             file << ", ";
         }
     }
-    file << " {}\n";
+    file << " {}\n\n";
 
     // Accept method
-    file << "    template<typename R>\n";
-    file << "    R accept(" << baseName << "Visitor<R>& visitor) const {\n";
+    file << "    void accept(" << baseName << "Visitor& visitor) const override {\n";
     file << "        return visitor.visit" << className << "(*this);\n";
     file << "    }\n";
 
@@ -104,7 +102,7 @@ void defineAst(const std::string& outputDir, const std::string& baseName, const 
     file << "class " << baseName << " {\n";
     file << "public:\n";
     file << "    virtual ~" << baseName << "() = default;\n";
-    file << "    virtual void accept() const = 0;\n";  // Non-templated pure virtual function
+    file << "    virtual void accept(" << baseName << "Visitor& visitor) const = 0;\n";  // Non-templated pure virtual function
     file << "};\n";
     file << "\n";
 

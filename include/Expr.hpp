@@ -4,19 +4,18 @@
 #include <memory>
 #include "Token.hpp"
 
-template<typename R>
 class ExprVisitor {
 public:
-    virtual R visitBinary (const Binary & Expr) = 0;
-    virtual R visitGrouping (const Grouping & Expr) = 0;
-    virtual R visitLiteral (const Literal & Expr) = 0;
-    virtual R visitUnary (const Unary & Expr) = 0;
+    virtual void visitBinary (const Binary & Expr) = 0;
+    virtual void visitGrouping (const Grouping & Expr) = 0;
+    virtual void visitLiteral (const Literal & Expr) = 0;
+    virtual void visitUnary (const Unary & Expr) = 0;
 };
 
 class Expr {
 public:
     virtual ~Expr() = default;
-    virtual void accept() const = 0;
+    virtual void accept(ExprVisitor& visitor) const = 0;
 };
 
 class Binary  : public Expr {
@@ -27,8 +26,8 @@ public:
 
     Binary (std::unique_ptr<Expr> left, Token op, std::unique_ptr<Expr> right)
         : left(std::move(left)), op(op), right(std::move(right)) {}
-    template<typename R>
-    R accept(ExprVisitor<R>& visitor) const {
+
+    void accept(ExprVisitor& visitor) const override {
         return visitor.visitBinary (*this);
     }
 };
@@ -39,8 +38,8 @@ public:
 
     Grouping (std::unique_ptr<Expr> expression)
         : expression(std::move(expression)) {}
-    template<typename R>
-    R accept(ExprVisitor<R>& visitor) const {
+
+    void accept(ExprVisitor& visitor) const override {
         return visitor.visitGrouping (*this);
     }
 };
@@ -51,8 +50,8 @@ public:
 
     Literal (std::shared_ptr<void> value)
         : value(value) {}
-    template<typename R>
-    R accept(ExprVisitor<R>& visitor) const {
+
+    void accept(ExprVisitor& visitor) const override {
         return visitor.visitLiteral (*this);
     }
 };
@@ -64,8 +63,8 @@ public:
 
     Unary (Token op, std::unique_ptr<Expr> right)
         : op(op), right(std::move(right)) {}
-    template<typename R>
-    R accept(ExprVisitor<R>& visitor) const {
+
+    void accept(ExprVisitor& visitor) const override {
         return visitor.visitUnary (*this);
     }
 };
