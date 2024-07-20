@@ -11,3 +11,7 @@ std::string Token::toString() const {
     result += '\n';
     return result;
 }
+
+std::string Token::getLexeme() const {
+    return lexeme;
+}
