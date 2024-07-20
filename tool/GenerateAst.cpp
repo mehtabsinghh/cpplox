@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <memory>
 
 // Trim function to remove leading and trailing spaces
 std::string trim(const std::string& str) {
@@ -26,6 +27,18 @@ std::vector<std::string> split(const std::string& str, const std::string& delim)
     return tokens;
 }
 
+void defineVisitor(std::ofstream& file, const std::string& baseName, const std::vector<std::string>& types) {
+    file << "template<typename R>\n";
+    file << "class " << baseName << "Visitor {\n";
+    file << "public:\n";
+    for (const std::string& type : types) {
+        const std::string typeName = type.substr(0, type.find(":"));
+        file << "    virtual R visit" << typeName << "(const " << typeName << "& " << baseName << ") = 0;\n";
+    }
+    file << "};\n";
+    file << "\n";
+}
+
 void defineType(std::ofstream& file, const std::string& baseName, const std::string& className, const std::string& fieldList) {
     file << "class " << className << " : public " << baseName << " {\n";
     file << "public:\n";
@@ -45,7 +58,7 @@ void defineType(std::ofstream& file, const std::string& baseName, const std::str
 
     file << ")\n";
 
-    // Initialiser list
+    // Initializer list
     file << "        : ";
     for (size_t i = 0; i < fields.size(); i++) {
         std::vector<std::string> fieldTokens = split(fields[i], " ");
@@ -62,27 +75,42 @@ void defineType(std::ofstream& file, const std::string& baseName, const std::str
     }
     file << " {}\n";
 
+    // Accept method
+    file << "    template<typename R>\n";
+    file << "    R accept(" << baseName << "Visitor<R>& visitor) const {\n";
+    file << "        return visitor.visit" << className << "(*this);\n";
+    file << "    }\n";
+
     file << "};\n";
     file << "\n";
-
 }
 
-void defineAst(const std::string& outputDor, const std::string& baseName, const std::vector<std::string>& types) {
-    std::string path = outputDor + "/" + baseName + ".hpp";
+void defineAst(const std::string& outputDir, const std::string& baseName, const std::vector<std::string>& types) {
+    std::string path = outputDir + "/" + baseName + ".hpp";
     std::ofstream file(path);
     file << "#ifndef " << baseName << "_HPP\n";
     file << "#define " << baseName << "_HPP\n";
     file << "\n";
+
+    // Headers
     file << "#include <memory>\n";
     file << "#include \"Token.hpp\"\n";
     file << "\n";
+
+    // Visitor interface
+    defineVisitor(file, baseName, types);
+
+    // Base class
     file << "class " << baseName << " {\n";
     file << "public:\n";
     file << "    virtual ~" << baseName << "() = default;\n";
+    file << "    virtual void accept() const = 0;\n";  // Non-templated pure virtual function
     file << "};\n";
     file << "\n";
+
+    // Derived classes
     for (const std::string& type : types) {
-        const std::string className = type.substr(0, type.find(":") - 1);
+        const std::string className = type.substr(0, type.find(":"));
         const std::string fields = type.substr(type.find(":") + 1);
         defineType(file, baseName, className, fields);
     }
