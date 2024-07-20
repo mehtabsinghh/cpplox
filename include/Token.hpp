@@ -15,6 +15,7 @@ public:
         : type(type), lexeme(lexeme), literal(literal), line(line) {}
     
     std::string toString() const;
+    std::string getLexeme() const;
 };
 
 #endif
