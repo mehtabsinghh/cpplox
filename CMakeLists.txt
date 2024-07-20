@@ -12,7 +12,7 @@ set(SOURCES
     src/Lox.cpp 
     src/Scanner.cpp 
     src/Token.cpp
+    src/AstPrinter.cpp
     # Add more source files here if needed
 )
-
 add_executable(cpplox ${SOURCES})
