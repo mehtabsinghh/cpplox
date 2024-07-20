@@ -95,6 +95,13 @@ void defineAst(const std::string& outputDir, const std::string& baseName, const 
     file << "#include \"Token.hpp\"\n";
     file << "\n";
 
+    // Forward declarations
+    for (const std::string& type : types) {
+        const std::string className = type.substr(0, type.find(":"));
+        file << "class " << className << ";\n";
+    }
+    file << "\n";
+
     // Visitor interface
     defineVisitor(file, baseName, types);
 
