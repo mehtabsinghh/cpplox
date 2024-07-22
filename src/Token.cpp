@@ -15,3 +15,11 @@ std::string Token::toString() const {
 std::string Token::getLexeme() const {
     return lexeme;
 }
+
+TokenType Token::getType() const {
+    return type;
+}
+
+std::shared_ptr<void> Token::getLiteral() const {
+    return literal;
+}

@@ -16,6 +16,8 @@ public:
     
     std::string toString() const;
     std::string getLexeme() const;
+    TokenType getType() const;
+    std::shared_ptr<void> getLiteral() const;
 };
 
 #endif
