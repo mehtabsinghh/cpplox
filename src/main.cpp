@@ -2,24 +2,19 @@
 #include "AstPrinter.hpp"
 
 // Helper function to create a sample expression
-std::unique_ptr<Expr> createSampleExpression() {
-    // Creating shared pointers for literals
-    auto intLiteral = std::make_shared<int>(123);
-    auto doubleLiteral = std::make_shared<double>(45.67);
-
-    // Creating Tokens with shared_ptr<void>
-    Token minusToken(TokenType::MINUS, "-", nullptr, 1);
-    Token starToken(TokenType::STAR, "*", nullptr, 1);
-
-    // Creating expressions
-    return std::make_unique<Binary>(
+auto createSampleExpression() {
+    // Creares the expression (* (- 123.00)(group 45.67))
+    auto expression = std::make_unique<Binary>(
         std::make_unique<Unary>(
-            minusToken,
-            std::make_unique<Literal>(intLiteral)),
-        starToken,
+            Token(TokenType::MINUS, "-", nullptr, 1),
+            std::make_unique<Literal>(TokenType::STRING, std::make_shared<double>(123))
+        ),
+        Token(TokenType::STAR, "*", nullptr, 1),
         std::make_unique<Grouping>(
-            std::make_unique<Literal>(doubleLiteral))
+            std::make_unique<Literal>(TokenType::NUMBER, std::make_shared<double>(45.67))
+        )
     );
+    return expression;
 }
 
 void testExpression() {
