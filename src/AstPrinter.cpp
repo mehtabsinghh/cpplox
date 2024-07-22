@@ -21,10 +21,15 @@ void AstPrinter::visitGrouping (const Grouping& Expr) {
     Does not work, add cases for different types of literals (int, double, string, etc.)
 */
 void AstPrinter::visitLiteral (const Literal& Expr) {
-    if (Expr.value == nullptr) {
+    if (Expr.type == TokenType::NIL || Expr.value == nullptr) {
         result += "nil";
+    }
+    if (Expr.type == TokenType::NUMBER) {
+        result += std::to_string(*(std::static_pointer_cast<double>(Expr.value)));
+    } else if (Expr.type == TokenType::STRING) {
+        result += *(std::static_pointer_cast<std::string>(Expr.value));
     } else {
-        result += *std::static_pointer_cast<std::string>(Expr.value);
+        result += "nil";
     }
 }
 
