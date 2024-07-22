@@ -51,10 +51,11 @@ public:
 
 class Literal  : public Expr {
 public:
+    TokenType type;
     std::shared_ptr<void> value;
 
-    Literal (std::shared_ptr<void> value)
-        : value(value) {}
+    Literal (TokenType type, std::shared_ptr<void> value)
+        : type(type), value(value) {}
 
     void accept(ExprVisitor& visitor) const override {
         return visitor.visitLiteral (*this);

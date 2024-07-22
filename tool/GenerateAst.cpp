@@ -127,7 +127,7 @@ int main() {
     defineAst(outputDir, "Expr", {
         "Binary : std::unique_ptr<Expr> left, Token op, std::unique_ptr<Expr> right",
         "Grouping : std::unique_ptr<Expr> expression",
-        "Literal : std::shared_ptr<void> value",
+        "Literal : TokenType type, std::shared_ptr<void> value",
         "Unary : Token op, std::unique_ptr<Expr> right"
     });
 }
