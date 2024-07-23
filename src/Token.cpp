@@ -23,3 +23,7 @@ TokenType Token::getType() const {
 std::shared_ptr<void> Token::getLiteral() const {
     return literal;
 }
+
+int Token::getLine() const {
+    return line;
+}

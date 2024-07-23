@@ -18,6 +18,7 @@ public:
     std::string getLexeme() const;
     TokenType getType() const;
     std::shared_ptr<void> getLiteral() const;
+    int getLine() const;
 };
 
 #endif
