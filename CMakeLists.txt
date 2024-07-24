@@ -14,6 +14,7 @@ set(SOURCES
     src/Token.cpp
     src/AstPrinter.cpp
     src/Parser.cpp
+    src/Interpreter.cpp
     # Add more source files here if needed
 )
 add_executable(cpplox ${SOURCES})
