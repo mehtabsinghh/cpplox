@@ -36,14 +36,25 @@ void Lox::run(const std::string& source) {
     Scanner scanner(source);
     std::vector<Token> tokens = scanner.scanTokens();
 
-    // For now outputs tokens
-    for (auto token : tokens) {
-        std::cout << token.toString();
-    }
+    Parser parser(tokens);
+    std::unique_ptr<Expr> expression = parser.parse();
+
+    if (hadError) return;
+    AstPrinter printer;
+    printer.print(*expression);
+    std::cout << printer.get() << std::endl;
 }
 
 void Lox::error(int line, const std::string& message) {
     report(line, "", message);
+}
+
+void Lox::error(Token token, const std::string& message) {
+    if (token.getType() == TokenType::END_OF_FILE) {
+        report(token.getLine(), " at end", message);
+    } else {
+        report(token.getLine(), " at '" + token.getLexeme() + "'", message);
+    }
 }
 
 void Lox::report(int line, const std::string& where, const std::string& message) {

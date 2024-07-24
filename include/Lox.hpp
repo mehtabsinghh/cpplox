@@ -8,12 +8,15 @@
 #include <cstdlib>
 #include "Token.hpp"
 #include "Scanner.hpp"
+#include "Parser.hpp"
+#include "AstPrinter.hpp"
 
 
 class Lox {
     static bool hadError;
 public:
     static void error(int line, const std::string& message);
+    static void error(Token token, const std::string& message);
     static void runFile(const std::string& path);
     static void runPrompt();
     
