@@ -1,5 +1,6 @@
 #include "Interpreter.hpp"
-
+#include "RuntimeError.hpp"
+#include <iostream>
 
 void Interpreter::visitLiteral(const Literal& expr) {
     result = expr.value;
@@ -19,10 +20,13 @@ void Interpreter::visitUnary(const Unary& expr) {
 
     switch (expr.op.getType()) {
         case TokenType::MINUS:
+            checkNumberOperand(expr.op, right);
             result = std::make_shared<double>(-*get_if<double>(right));
             break;
         case TokenType::BANG:
             result = std::make_shared<bool>(!isTruthy(right));
+            break;
+        default:
             break;
     }
 }
@@ -43,15 +47,20 @@ void Interpreter::visitBinary(const Binary& expr) {
 
     switch (expr.op.getType()) {
         case TokenType::GREATER:
+            checkNumberOperands(expr.op, left, right);
             result = std::make_shared<bool>(*get_if<double>(left) > *get_if<double>(right));
             break;
         case TokenType::GREATER_EQUAL:
+            checkNumberOperands(expr.op, left, right);
             result = std::make_shared<bool>(*get_if<double>(left) >= *get_if<double>(right));
             break;
         case TokenType::LESS:
+            checkNumberOperands(expr.op, left, right);
+            checkNumberOperands(expr.op, left, right);
             result = std::make_shared<bool>(*get_if<double>(left) < *get_if<double>(right));
             break;
         case TokenType::LESS_EQUAL:
+            checkNumberOperands(expr.op, left, right);
             result = std::make_shared<bool>(*get_if<double>(left) <= *get_if<double>(right));
             break;
         case TokenType::BANG_EQUAL:
@@ -61,6 +70,7 @@ void Interpreter::visitBinary(const Binary& expr) {
             result = std::make_shared<bool>(isEqual(left, right));
             break;
         case TokenType::MINUS:
+            checkNumberOperands(expr.op, left, right);
             result = std::make_shared<double>(*get_if<double>(left) - *get_if<double>(right));
             break;
         case TokenType::PLUS:
@@ -76,12 +86,19 @@ void Interpreter::visitBinary(const Binary& expr) {
                 } else if (auto r = get_if<std::string>(right)) {
                     result = std::make_shared<std::string>(*l + *r);
                 }
+            } else {
+                throw RuntimeError(expr.op, "Operands must be two numbers or two strings.");
             }
+            break;
         case TokenType::SLASH:
+            checkNumberOperands(expr.op, left, right);
             result = std::make_shared<double>(*get_if<double>(left) / *get_if<double>(right));
             break;
         case TokenType::STAR:
+            checkNumberOperands(expr.op, left, right);
             result = std::make_shared<double>(*get_if<double>(left) * *get_if<double>(right));
+            break;
+        default:
             break;
     }
 }
@@ -101,4 +118,46 @@ bool Interpreter::isEqual(const std::shared_ptr<void>& a, const std::shared_ptr<
     }
 
     return false;
+}
+
+void Interpreter::checkNumberOperand(const Token op, const std::shared_ptr<void>& operand) {
+    if (auto oper = get_if<double>(operand)) {
+        return;
+    }
+    throw RuntimeError(op, "Operand must be a number.");
+}
+
+void Interpreter::checkNumberOperands(const Token op, const std::shared_ptr<void>& left, const std::shared_ptr<void>& right) {
+    if (auto l = get_if<double>(left), r = get_if<double>(right); l && r) {
+        return;
+    }
+    throw RuntimeError(op, "Operands must be numbers.");
+}
+
+void Interpreter::interpret(std::unique_ptr<Expr>& expr) {
+    try {
+        std::shared_ptr<void> value = evaluate(*expr);
+        std::cout << stringify(value) << std::endl;
+    } catch (RuntimeError& error) {
+        std::cerr << error.what() << std::endl;
+    }
+}
+
+std::string Interpreter::stringify(const std::shared_ptr<void>& object) {
+    if (object == nullptr) {
+        return "nil";
+    }
+    if (auto num = get_if<double>(object)) {
+        std::string text = std::to_string(*num);
+        // Remove trailing ".0" if present
+        if (text.find(".0") != std::string::npos) {
+            text = text.substr(0, text.find(".0"));
+        }
+        return text;
+    }
+    // For other types, assume their toString method (if any)
+    // This will require specific handling if other types are used
+    // As a placeholder, just return a generic string conversion
+    // This is a simplistic conversion; adjust as necessary
+    return "unsupported type";
 }
