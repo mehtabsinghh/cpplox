@@ -1,6 +1,7 @@
 #include "Lox.hpp"
 
 bool Lox::hadError = false;
+bool Lox::hadRuntimeError = false;
 
 void Lox::runFile(const std::string& path) {
     // Reads file from path
@@ -18,6 +19,7 @@ void Lox::runFile(const std::string& path) {
 
     // Indicate an error in the exit code
     if (hadError) std::exit(65);
+    if (hadRuntimeError) std::exit(70);
 }
 
 void Lox::runPrompt() {
@@ -40,9 +42,8 @@ void Lox::run(const std::string& source) {
     std::unique_ptr<Expr> expression = parser.parse();
 
     if (hadError) return;
-    AstPrinter printer;
-    printer.print(*expression);
-    std::cout << printer.get() << std::endl;
+    Interpreter interpreter;
+    interpreter.interpret(expression);
 }
 
 void Lox::error(int line, const std::string& message) {
@@ -62,3 +63,7 @@ void Lox::report(int line, const std::string& where, const std::string& message)
     hadError = true;
 }
 
+void Lox::runtimeError(RuntimeError error) {
+    std::cerr << error.what() << "\n[line" << error.token.getLine() << "]" << std::endl;
+    hadError = true;
+}
