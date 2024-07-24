@@ -1,16 +1,17 @@
+#ifndef Parser_HPP
+#define Parser_HPP
+
 #include "Token.hpp"
 #include "Expr.hpp"
 #include "ParserError.hpp"
-
-#include <vector>
-#include <vector>
 
 class Parser {
     const std::vector<Token> tokens;
     int current = 0;
 
 public:
-    Parser(const std::vector<Token>& tokens);
+    Parser(const std::vector<Token>& tokens) : tokens(tokens) {}
+    std::unique_ptr<Expr> parse();
 
 private:
     std::unique_ptr<Expr> expression();
@@ -28,4 +29,8 @@ private:
     std::unique_ptr<Expr> primary();
     Token consume(TokenType type, const std::string& message);
     ParseError error(Token token, const std::string& message);
+    void synchronize();
+    
 };
+
+#endif
