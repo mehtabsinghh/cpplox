@@ -1,4 +1,6 @@
 #include "Lox.hpp"
+#include "Stmt.hpp"
+#include <vector>
 
 bool Lox::hadError = false;
 bool Lox::hadRuntimeError = false;
@@ -39,11 +41,11 @@ void Lox::run(const std::string& source) {
     std::vector<Token> tokens = scanner.scanTokens();
 
     Parser parser(tokens);
-    std::unique_ptr<Expr> expression = parser.parse();
+    std::vector<std::unique_ptr<Stmt>> statements = parser.parse();
 
     if (hadError) return;
     Interpreter interpreter;
-    interpreter.interpret(expression);
+    interpreter.interpret(statements);
 }
 
 void Lox::error(int line, const std::string& message) {
