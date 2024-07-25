@@ -36,7 +36,7 @@ std::vector<Token> Scanner::scanTokens() {
 void Scanner::identifier() {
     // Scans an identifier and adds it to the token list
     while (isAlphaNumeric(peek())) advance();
-    std::string text = source.substr(start, current);
+    std::string text = source.substr(start, current - start);
     TokenType type = keywords.find(text) != keywords.end() ? keywords.at(text) : TokenType::IDENTIFIER;
     addToken(type);
 }
