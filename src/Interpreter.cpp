@@ -1,9 +1,11 @@
 #include "Interpreter.hpp"
 #include "RuntimeError.hpp"
+#include "Lox.hpp"
 #include <iostream>
 
 void Interpreter::visitLiteral(const Literal& expr) {
     result = expr.value;
+    type = expr.type;
 }
 
 void Interpreter::visitGrouping(const Grouping& expr) {
@@ -15,106 +17,118 @@ std::shared_ptr<void> Interpreter::evaluate(const Expr& expr) {
     return result;
 }
 
+void Interpreter::visitExpression(const Expression& stmt) {
+    evaluate(*stmt.expression);
+}
+
+void Interpreter::visitPrint(const Print& stmt) {
+    std::shared_ptr<void> value = evaluate(*stmt.expression);
+    std::cout << stringify(value, type) << std::endl;
+}
+
+void Interpreter::execute(const Stmt& stmt) {
+    stmt.accept(*this);
+}
+
 void Interpreter::visitUnary(const Unary& expr) {
     std::shared_ptr<void> right = evaluate(*expr.right);
-
+    TokenType rightType = getType();
     switch (expr.op.getType()) {
         case TokenType::MINUS:
             checkNumberOperand(expr.op, right);
-            result = std::make_shared<double>(-*get_if<double>(right));
+            result = std::make_shared<double>(-*std::static_pointer_cast<double>(right));
             break;
         case TokenType::BANG:
-            result = std::make_shared<bool>(!isTruthy(right));
+            result = std::make_shared<bool>(!isTruthy(right, rightType));
+            type = !isTruthy(right, rightType) ? TokenType::TRUE : TokenType::FALSE;
+            std::cout << !isTruthy(right, rightType) << std::endl;
             break;
         default:
             break;
     }
 }
 
-bool Interpreter::isTruthy(const std::shared_ptr<void>& object) {
+bool Interpreter::isTruthy(const std::shared_ptr<void>& object, TokenType type) {
     if (object == nullptr) {
         return false;
     }
-    if (auto boolean = get_if<bool>(object)) {
-        return *boolean;
+    if (type == TokenType::FALSE) {
+        return false;
     }
     return true;
 }
 
 void Interpreter::visitBinary(const Binary& expr) {
     std::shared_ptr<void> left = evaluate(*expr.left);
+    TokenType leftType = getType();
     std::shared_ptr<void> right = evaluate(*expr.right);
+    TokenType rightType = getType();
 
     switch (expr.op.getType()) {
         case TokenType::GREATER:
             checkNumberOperands(expr.op, left, right);
-            result = std::make_shared<bool>(*get_if<double>(left) > *get_if<double>(right));
+            result = std::make_shared<bool>(*std::static_pointer_cast<double>(left) > *std::static_pointer_cast<double>(right));
             break;
         case TokenType::GREATER_EQUAL:
             checkNumberOperands(expr.op, left, right);
-            result = std::make_shared<bool>(*get_if<double>(left) >= *get_if<double>(right));
+            result = std::make_shared<bool>(*std::static_pointer_cast<double>(left) >= *std::static_pointer_cast<double>(right));
             break;
         case TokenType::LESS:
             checkNumberOperands(expr.op, left, right);
             checkNumberOperands(expr.op, left, right);
-            result = std::make_shared<bool>(*get_if<double>(left) < *get_if<double>(right));
+            result = std::make_shared<bool>(*std::static_pointer_cast<double>(left) < *std::static_pointer_cast<double>(right));
             break;
         case TokenType::LESS_EQUAL:
             checkNumberOperands(expr.op, left, right);
-            result = std::make_shared<bool>(*get_if<double>(left) <= *get_if<double>(right));
+            result = std::make_shared<bool>(*std::static_pointer_cast<double>(left) <= *std::static_pointer_cast<double>(right));
             break;
         case TokenType::BANG_EQUAL:
-            result = std::make_shared<bool>(!isEqual(left, right));
+            result = std::make_shared<bool>(!isEqual(left, right, leftType, rightType));
             break;
         case TokenType::EQUAL_EQUAL:
-            result = std::make_shared<bool>(isEqual(left, right));
+            result = std::make_shared<bool>(isEqual(left, right, leftType, rightType));
             break;
         case TokenType::MINUS:
             checkNumberOperands(expr.op, left, right);
-            result = std::make_shared<double>(*get_if<double>(left) - *get_if<double>(right));
+            result = std::make_shared<double>(*std::static_pointer_cast<double>(left) - *std::static_pointer_cast<double>(right));
+            type = TokenType::NUMBER;
             break;
         case TokenType::PLUS:
-            if (auto l = get_if<double>(left)) {
-                if (auto r = get_if<double>(right)) {
-                    result = std::make_shared<double>(*l + *r);
-                } else if (auto r = get_if<std::string>(right)) {
-                    result = std::make_shared<std::string>(std::to_string(*l) + *r);
-                }
-            } else if (auto l = get_if<std::string>(left)) {
-                if (auto r = get_if<double>(right)) {
-                    result = std::make_shared<std::string>(*l + std::to_string(*r));
-                } else if (auto r = get_if<std::string>(right)) {
-                    result = std::make_shared<std::string>(*l + *r);
-                }
-            } else {
-                throw RuntimeError(expr.op, "Operands must be two numbers or two strings.");
-            }
+            checkNumberOperands(expr.op, left, right);
+            result = std::make_shared<double>(*std::static_pointer_cast<double>(left) + *std::static_pointer_cast<double>(right));
+            type = TokenType::NUMBER;
             break;
         case TokenType::SLASH:
             checkNumberOperands(expr.op, left, right);
-            result = std::make_shared<double>(*get_if<double>(left) / *get_if<double>(right));
+            result = std::make_shared<double>(*std::static_pointer_cast<double>(left) / *std::static_pointer_cast<double>(right));
+            type = TokenType::NUMBER;
             break;
         case TokenType::STAR:
             checkNumberOperands(expr.op, left, right);
-            result = std::make_shared<double>(*get_if<double>(left) * *get_if<double>(right));
+            result = std::make_shared<double>(*std::static_pointer_cast<double>(left) * *std::static_pointer_cast<double>(right));
+            type = TokenType::NUMBER;
             break;
         default:
             break;
     }
 }
 
-bool Interpreter::isEqual(const std::shared_ptr<void>& a, const std::shared_ptr<void>& b) {
+bool Interpreter::isEqual(const std::shared_ptr<void>& a, const std::shared_ptr<void>& b, TokenType aType, TokenType bType) {
     if (a == nullptr && b == nullptr) {
         return true;
-    } else if (a == nullptr) {
+    }
+    if (a == nullptr) {
         return false;
     }
-    if (auto a_num = get_if<double>(a), b_num = get_if<double>(b); a_num && b_num) {
-            return *a_num == *b_num;
-    } else if (auto a_str = get_if<std::string>(a), b_str = get_if<std::string>(b); a_str && b_str) {
-            return *a_str == *b_str;
-    } else if (auto a_bool = get_if<bool>(a), b_bool = get_if<bool>(b); a_bool && b_bool) {
-            return *a_bool == *b_bool;
+
+    if (aType != bType) {
+        return false;
+    }
+
+    if (aType == TokenType::NUMBER) {
+        return *std::static_pointer_cast<double>(a) == *std::static_pointer_cast<double>(b);
+    } else if (aType == TokenType::STRING) {
+        return *std::static_pointer_cast<std::string>(a) == *std::static_pointer_cast<std::string>(b);
     }
 
     return false;
@@ -134,30 +148,44 @@ void Interpreter::checkNumberOperands(const Token op, const std::shared_ptr<void
     throw RuntimeError(op, "Operands must be numbers.");
 }
 
-void Interpreter::interpret(std::unique_ptr<Expr>& expr) {
+void Interpreter::interpret(const std::vector<std::unique_ptr<Stmt>>& statements) {
     try {
-        std::shared_ptr<void> value = evaluate(*expr);
-        std::cout << stringify(value) << std::endl;
-    } catch (RuntimeError& error) {
-        std::cerr << error.what() << std::endl;
+        for (const auto& statement : statements) {
+            execute(*statement);
+        }
+    } catch (const RuntimeError& error) {
+        Lox::runtimeError(error);
     }
 }
 
-std::string Interpreter::stringify(const std::shared_ptr<void>& object) {
-    if (object == nullptr) {
+std::string Interpreter::stringify(const std::shared_ptr<void>& object, TokenType type) {
+    if (object == nullptr || type == TokenType::NIL) {
         return "nil";
     }
-    if (auto num = get_if<double>(object)) {
-        std::string text = std::to_string(*num);
+
+    if (type == TokenType::NUMBER) {
+        auto num = *std::static_pointer_cast<double>(object);
+        std::string text = std::to_string(num);
         // Remove trailing ".0" if present
         if (text.find(".0") != std::string::npos) {
             text = text.substr(0, text.find(".0"));
         }
         return text;
+    } else if (type == TokenType::STRING) {
+        return *std::static_pointer_cast<std::string>(object);
+    } else if (type == TokenType::TRUE) {
+        return "true";
+    } else if (type == TokenType::FALSE) {
+        return "false";
     }
-    // For other types, assume their toString method (if any)
-    // This will require specific handling if other types are used
-    // As a placeholder, just return a generic string conversion
-    // This is a simplistic conversion; adjust as necessary
-    return "unsupported type";
+
+    return "nil";
+}
+
+std::shared_ptr<void>& Interpreter::getResult() {
+    return result;
+}
+
+TokenType Interpreter::getType() {
+    return type;
 }
