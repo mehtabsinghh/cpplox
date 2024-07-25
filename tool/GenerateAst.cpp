@@ -130,4 +130,8 @@ int main() {
         "Literal : TokenType type, std::shared_ptr<void> value",
         "Unary : Token op, std::unique_ptr<Expr> right"
     });
+    defineAst(outputDir, "Stmt", {
+        "Expression : std::unique_ptr<Expr> expression",
+        "Print : std::unique_ptr<Expr> expression"
+    });
 }
