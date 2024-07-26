@@ -41,7 +41,6 @@ void Interpreter::visitUnary(const Unary& expr) {
         case TokenType::BANG:
             result = std::make_shared<bool>(!isTruthy(right, rightType));
             type = !isTruthy(right, rightType) ? TokenType::TRUE : TokenType::FALSE;
-            std::cout << !isTruthy(right, rightType) << std::endl;
             break;
         default:
             break;
@@ -49,12 +48,11 @@ void Interpreter::visitUnary(const Unary& expr) {
 }
 
 bool Interpreter::isTruthy(const std::shared_ptr<void>& object, TokenType type) {
-    if (object == nullptr) {
-        return false;
-    }
     if (type == TokenType::FALSE) {
         return false;
-    }
+    } else if (type == TokenType::NIL) {
+        return false;
+    } 
     return true;
 }
 
@@ -159,7 +157,7 @@ void Interpreter::interpret(const std::vector<std::unique_ptr<Stmt>>& statements
 }
 
 std::string Interpreter::stringify(const std::shared_ptr<void>& object, TokenType type) {
-    if (object == nullptr || type == TokenType::NIL) {
+    if (type == TokenType::NIL) {
         return "nil";
     }
 
@@ -177,6 +175,8 @@ std::string Interpreter::stringify(const std::shared_ptr<void>& object, TokenTyp
         return "true";
     } else if (type == TokenType::FALSE) {
         return "false";
+    } else if (object == nullptr) {
+        return "nil";
     }
 
     return "nil";

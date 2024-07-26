@@ -32,7 +32,6 @@ void testExpression() {
 }
 
 int main(int argc, char* argv[]) {
-    /*
     Lox lox;
 
     if (argc > 2) {
@@ -44,7 +43,6 @@ int main(int argc, char* argv[]) {
     } else {
         // Run interactive prompt
         lox.runPrompt();
-    } */
-   testExpression();
+    } 
     return 0;
 }
