@@ -8,6 +8,7 @@ class Binary ;
 class Grouping ;
 class Literal ;
 class Unary ;
+class Variable ;
 
 class ExprVisitor {
 public:
@@ -15,6 +16,7 @@ public:
     virtual void visitGrouping (const Grouping & Expr) = 0;
     virtual void visitLiteral (const Literal & Expr) = 0;
     virtual void visitUnary (const Unary & Expr) = 0;
+    virtual void visitVariable (const Variable & Expr) = 0;
 };
 
 class Expr {
@@ -72,6 +74,18 @@ public:
 
     void accept(ExprVisitor& visitor) const override {
         return visitor.visitUnary (*this);
+    }
+};
+
+class Variable  : public Expr {
+public:
+    Token name;
+
+    Variable (Token name)
+        : name(name) {}
+
+    void accept(ExprVisitor& visitor) const override {
+        return visitor.visitVariable (*this);
     }
 };
 

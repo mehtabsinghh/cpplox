@@ -3,15 +3,16 @@
 
 #include <memory>
 #include "Token.hpp"
-#include "Expr.hpp"
 
 class Expression ;
 class Print ;
+class Var ;
 
 class StmtVisitor {
 public:
     virtual void visitExpression (const Expression & Stmt) = 0;
     virtual void visitPrint (const Print & Stmt) = 0;
+    virtual void visitVar (const Var & Stmt) = 0;
 };
 
 class Stmt {
@@ -41,6 +42,19 @@ public:
 
     void accept(StmtVisitor& visitor) const override {
         return visitor.visitPrint (*this);
+    }
+};
+
+class Var  : public Stmt {
+public:
+    Token name;
+    std::unique_ptr<Expr> initializer;
+
+    Var (Token name, std::unique_ptr<Expr> initializer)
+        : name(name), initializer(std::move(initializer)) {}
+
+    void accept(StmtVisitor& visitor) const override {
+        return visitor.visitVar (*this);
     }
 };
 
