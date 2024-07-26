@@ -5,7 +5,7 @@
 
 // Parses an expression
 std::unique_ptr<Expr> Parser::expression() {
-    return equality();
+    return assignment();
 }
 
 // Parses a declaration
@@ -87,7 +87,6 @@ std::unique_ptr<Expr> Parser::comparison() {
 
     return expr;
 }
-
 
 // Parses a term expression
 std::unique_ptr<Expr> Parser::term() {
@@ -245,4 +244,21 @@ std::unique_ptr<Stmt> Parser::expressionStatement() {
     std::unique_ptr<Expr> expr = expression();
     consume(TokenType::SEMICOLON, "Expect ';' after expression.");
     return std::make_unique<Expression>(std::move(expr));
+}
+
+std::unique_ptr<Expr> Parser::assignment() {
+    std::unique_ptr<Expr> expr = equality();
+
+    if (match({TokenType::EQUAL})) {
+        Token equals = previous();
+        std::unique_ptr<Expr> value = assignment();
+
+        if (dynamic_cast<Variable*>(expr.get())) {
+            return std::make_unique<Assign>(dynamic_cast<Variable*>(expr.release())->name, std::move(value));
+        }
+
+        throw error(equals, "Invalid assignment target.");
+    }
+
+    return expr;
 }
