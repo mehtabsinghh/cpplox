@@ -6,21 +6,15 @@
 #include <string>
 #include <utility>
 #include <memory>
+#include <iostream>
 
 class Environment {
     std::unordered_map<std::string, std::pair<std::shared_ptr<void>, TokenType>> values;
 public:
-    void define(const std::string& name, const std::pair<std::shared_ptr<void>, TokenType>& value) {
-        values[name] = value;
-    }
-
-    std::pair<std::shared_ptr<void>, TokenType> get(const Token& name) {
-        if (values.find(name.getLexeme()) != values.end()) {
-            return values[name.getLexeme()];
-        }
-
-        throw std::runtime_error("Undefined variable '" + name.getLexeme() + "'.");
-    }
+    void define(const std::string& name, const std::pair<std::shared_ptr<void>, TokenType>& value);
+    std::pair<std::shared_ptr<void>, TokenType> get(const Token& name);
+    std::pair<std::shared_ptr<void>, TokenType> get(const std::string& name);
+    void assign(const Token& name, const std::pair<std::shared_ptr<void>, TokenType>& value);
 };
 
 
