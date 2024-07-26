@@ -125,6 +125,7 @@ void defineAst(const std::string& outputDir, const std::string& baseName, const 
 int main() {
     std::string outputDir = "../include";
     defineAst(outputDir, "Expr", {
+        "Assign : Token name, std::unique_ptr<Expr> value",
         "Binary : std::unique_ptr<Expr> left, Token op, std::unique_ptr<Expr> right",
         "Grouping : std::unique_ptr<Expr> expression",
         "Literal : TokenType type, std::shared_ptr<void> value",

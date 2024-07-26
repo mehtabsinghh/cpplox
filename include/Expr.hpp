@@ -4,6 +4,7 @@
 #include <memory>
 #include "Token.hpp"
 
+class Assign ;
 class Binary ;
 class Grouping ;
 class Literal ;
@@ -12,6 +13,7 @@ class Variable ;
 
 class ExprVisitor {
 public:
+    virtual void visitAssign (const Assign & Expr) = 0;
     virtual void visitBinary (const Binary & Expr) = 0;
     virtual void visitGrouping (const Grouping & Expr) = 0;
     virtual void visitLiteral (const Literal & Expr) = 0;
@@ -23,6 +25,19 @@ class Expr {
 public:
     virtual ~Expr() = default;
     virtual void accept(ExprVisitor& visitor) const = 0;
+};
+
+class Assign  : public Expr {
+public:
+    Token name;
+    std::unique_ptr<Expr> value;
+
+    Assign (Token name, std::unique_ptr<Expr> value)
+        : name(name), value(std::move(value)) {}
+
+    void accept(ExprVisitor& visitor) const override {
+        return visitor.visitAssign (*this);
+    }
 };
 
 class Binary  : public Expr {
