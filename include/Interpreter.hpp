@@ -3,6 +3,7 @@
 
 #include "Expr.hpp"
 #include "Stmt.hpp"
+#include "Environment.hpp"
 
 template<typename T>
 T* get_if(const std::shared_ptr<void>& ptr) {
@@ -13,6 +14,8 @@ T* get_if(const std::shared_ptr<void>& ptr) {
 }
 
 class Interpreter : public ExprVisitor, StmtVisitor {
+    std::unique_ptr<Environment> environment = std::make_unique<Environment>();
+    std::shared_ptr<void> result;
 public:
     void visitBinary (const Binary& expr) override;
     void visitGrouping (const Grouping& expr) override;
@@ -21,10 +24,13 @@ public:
     void interpret(const std::vector<std::unique_ptr<Stmt>>& statements);
     void visitExpression(const Expression& stmt) override;
     void visitPrint(const Print& stmt) override;
+    void visitVar(const Var& stmt) override;
+    void visitVariable(const Variable& expr) override;
+    void visitAssign(const Assign& stmt) override;
     std::shared_ptr<void>& getResult();
     TokenType getType();
 private:
-    std::shared_ptr<void> result;
+    // Global environment for the interpreter
     TokenType type;
     std::shared_ptr<void> evaluate(const Expr& expr);
     bool isTruthy(const std::shared_ptr<void>& object, TokenType type);

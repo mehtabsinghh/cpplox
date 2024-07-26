@@ -26,6 +26,28 @@ void Interpreter::visitPrint(const Print& stmt) {
     std::cout << stringify(value, type) << std::endl;
 }
 
+void Interpreter::visitVar(const Var& stmt) {
+    std::shared_ptr<void> value = nullptr;
+    if (stmt.initializer != nullptr) {
+        value = evaluate(*stmt.initializer);
+    }
+    
+    environment->define(stmt.name.getLexeme(), std::make_pair(value, type));
+}
+
+void Interpreter::visitAssign(const Assign& stmt) {
+    std::shared_ptr<void> value = evaluate(*stmt.value);
+    TokenType valueType = getType();
+    environment->assign(stmt.name, std::make_pair(value, valueType));
+}
+// TO DO
+// ENVIRONMENT IS BEING PASSED AROUND AS EMPTY
+void Interpreter::visitVariable(const Variable& expr) {
+    std::pair<std::shared_ptr<void>, TokenType> value = environment->get(expr.name);
+    result = value.first;
+    type = value.second;
+}
+
 void Interpreter::execute(const Stmt& stmt) {
     stmt.accept(*this);
 }
