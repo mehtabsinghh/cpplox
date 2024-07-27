@@ -52,6 +52,23 @@ void Interpreter::execute(const Stmt& stmt) {
     stmt.accept(*this);
 }
 
+void Interpreter::visitBlock(const Block& stmt) {
+    executeBlock(stmt.statements, std::make_shared<Environment>(environment));
+}
+
+void Interpreter::executeBlock(std::vector<std::shared_ptr<Stmt>> statements, std::shared_ptr<Environment> environment) {
+    std::shared_ptr<Environment> previous = this->environment;
+    try {
+        this->environment = environment;
+        for (const auto& statement : statements) {
+            execute(*statement);
+        }
+    } catch (const RuntimeError& error) {
+        Lox::runtimeError(error);
+    }
+    this->environment = previous;
+}
+
 void Interpreter::visitUnary(const Unary& expr) {
     std::shared_ptr<void> right = evaluate(*expr.right);
     TokenType rightType = getType();
@@ -168,7 +185,7 @@ void Interpreter::checkNumberOperands(const Token op, const std::shared_ptr<void
     throw RuntimeError(op, "Operands must be numbers.");
 }
 
-void Interpreter::interpret(const std::vector<std::unique_ptr<Stmt>>& statements) {
+void Interpreter::interpret(const std::vector<std::shared_ptr<Stmt>>& statements) {
     try {
         for (const auto& statement : statements) {
             execute(*statement);
