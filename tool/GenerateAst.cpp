@@ -129,12 +129,14 @@ int main() {
         "Binary : std::unique_ptr<Expr> left, Token op, std::unique_ptr<Expr> right",
         "Grouping : std::unique_ptr<Expr> expression",
         "Literal : TokenType type, std::shared_ptr<void> value",
+        "Logical : std::unique_ptr<Expr> left, Token op, std::unique_ptr<Expr> right",
         "Unary : Token op, std::unique_ptr<Expr> right",
         "Variable : Token name"
     });
     defineAst(outputDir, "Stmt", {
         "Block : std::vector<std::shared_ptr<Stmt>> statements",
         "Expression : std::unique_ptr<Expr> expression",
+        "If : std::unique_ptr<Expr> condition, std::shared_ptr<Stmt> thenBranch, std::shared_ptr<Stmt> elseBranch",
         "Print : std::unique_ptr<Expr> expression",
         "Var : Token name, std::unique_ptr<Expr> initializer"
     });
