@@ -8,6 +8,28 @@ void Interpreter::visitLiteral(const Literal& expr) {
     type = expr.type;
 }
 
+void Interpreter::visitLogical(const Logical& expr) {
+    std::shared_ptr<void> left = evaluate(*expr.left);
+    TokenType leftType = getType();
+
+    if (expr.op.getType() == TokenType::OR) {
+        if (isTruthy(left, leftType)) {
+            result = left;
+            type = leftType;
+            return;
+        }
+    } else {
+        if (!isTruthy(left, leftType)) {
+            result = left;
+            type = leftType;
+            return;
+        }
+    }
+
+    result = evaluate(*expr.right);
+    type = getType();
+}
+
 void Interpreter::visitGrouping(const Grouping& expr) {
     result = evaluate(*expr.expression);
 }
@@ -19,6 +41,14 @@ std::shared_ptr<void> Interpreter::evaluate(const Expr& expr) {
 
 void Interpreter::visitExpression(const Expression& stmt) {
     evaluate(*stmt.expression);
+}
+
+void Interpreter::visitIf(const If& stmt) {
+    if (isTruthy(evaluate(*stmt.condition), getType())) {
+        execute(*stmt.thenBranch);
+    } else if (stmt.elseBranch != nullptr) {
+        execute(*stmt.elseBranch);
+    }
 }
 
 void Interpreter::visitPrint(const Print& stmt) {
