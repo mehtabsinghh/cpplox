@@ -41,6 +41,8 @@ private:
     std::shared_ptr<Stmt> ifStatement();
     std::unique_ptr<Expr> logicalOr();
     std::unique_ptr<Expr> logicalAnd();
+    std::shared_ptr<Stmt> whileStatement();
+    std::shared_ptr<Stmt> forStatement();
 
 };
 

@@ -216,16 +216,58 @@ std::vector<std::shared_ptr<Stmt>> Parser::parse() {
 }
 
 std::shared_ptr<Stmt> Parser::statement() {
-    if (match({TokenType::IF})) {
-        return ifStatement();
-    } else
-    if (match({TokenType::PRINT})) {
-        return printStatement();
-    } else if (match({TokenType::LEFT_BRACE})) {
-        return std::make_unique<Block>(block());
-    }
+    if (match({TokenType::FOR})) return forStatement();
+    if (match({TokenType::IF})) return ifStatement();
+    if (match({TokenType::PRINT})) return printStatement();
+    if (match({TokenType::WHILE})) return whileStatement();
+    if (match({TokenType::LEFT_BRACE})) return std::make_unique<Block>(block());
 
     return expressionStatement();
+}
+
+std::shared_ptr<Stmt> Parser::forStatement() {
+    consume(TokenType::LEFT_PAREN, "Expect '(' after 'for'.");
+
+    std::shared_ptr<Stmt> initializer;
+    if (match({TokenType::SEMICOLON})) {
+        initializer = nullptr;
+    } else if (match({TokenType::VAR})) {
+        initializer = varDeclaration();
+    } else {
+        initializer = expressionStatement();
+    }
+
+    std::unique_ptr<Expr> condition = nullptr;
+    if (!check(TokenType::SEMICOLON)) {
+        condition = expression();
+    }
+    consume(TokenType::SEMICOLON, "Expect ';' after loop condition.");
+
+    std::unique_ptr<Expr> increment = nullptr;
+    if (!check(TokenType::RIGHT_PAREN)) {
+        increment = expression();
+    }
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after for clauses.");
+
+    std::shared_ptr<Stmt> body = statement();
+
+    if (increment != nullptr) {
+        std::vector<std::shared_ptr<Stmt>> statements;
+        statements.emplace_back(body);
+        statements.emplace_back(std::make_unique<Expression>(std::move(increment)));
+        body = std::make_shared<Block>(statements);
+    }
+
+    if (condition == nullptr) condition = std::make_unique<Literal>(TokenType::TRUE, nullptr);
+    body = std::make_shared<While>(std::move(condition), body);
+    if (initializer != nullptr){
+        std::vector<std::shared_ptr<Stmt>> statements;
+        statements.emplace_back(initializer);
+        statements.emplace_back(body);
+        body = std::make_shared<Block>(statements);
+    }
+
+    return body;
 }
 
 std::shared_ptr<Stmt> Parser::ifStatement() {
@@ -257,6 +299,15 @@ std::shared_ptr<Stmt> Parser::varDeclaration() {
 
     consume(TokenType::SEMICOLON, "Expect ';' after variable declaration.");
     return std::make_unique<Var>(name, std::move(initializer));
+}
+
+std::shared_ptr<Stmt> Parser::whileStatement() {
+    consume(TokenType::LEFT_PAREN, "Expect '(' after 'while'.");
+    std::unique_ptr<Expr> condition = expression();
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after condition.");
+    std::shared_ptr<Stmt> body = statement();
+
+    return std::make_shared<While>(std::move(condition), body);
 }
 
 std::shared_ptr<Stmt> Parser::expressionStatement() {
