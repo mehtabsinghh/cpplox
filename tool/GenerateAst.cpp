@@ -138,6 +138,7 @@ int main() {
         "Expression : std::unique_ptr<Expr> expression",
         "If : std::unique_ptr<Expr> condition, std::shared_ptr<Stmt> thenBranch, std::shared_ptr<Stmt> elseBranch",
         "Print : std::unique_ptr<Expr> expression",
-        "Var : Token name, std::unique_ptr<Expr> initializer"
+        "Var : Token name, std::unique_ptr<Expr> initializer",
+        "While : std::unique_ptr<Expr> condition, std::shared_ptr<Stmt> body"
     });
 }

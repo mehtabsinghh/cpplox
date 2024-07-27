@@ -9,6 +9,7 @@ class Expression ;
 class If ;
 class Print ;
 class Var ;
+class While ;
 
 class StmtVisitor {
 public:
@@ -17,6 +18,7 @@ public:
     virtual void visitIf (const If & Stmt) = 0;
     virtual void visitPrint (const Print & Stmt) = 0;
     virtual void visitVar (const Var & Stmt) = 0;
+    virtual void visitWhile (const While & Stmt) = 0;
 };
 
 class Stmt {
@@ -85,6 +87,19 @@ public:
 
     void accept(StmtVisitor& visitor) const override {
         return visitor.visitVar (*this);
+    }
+};
+
+class While  : public Stmt {
+public:
+    std::unique_ptr<Expr> condition;
+    std::shared_ptr<Stmt> body;
+
+    While (std::unique_ptr<Expr> condition, std::shared_ptr<Stmt> body)
+        : condition(std::move(condition)), body(body) {}
+
+    void accept(StmtVisitor& visitor) const override {
+        return visitor.visitWhile (*this);
     }
 };
 
