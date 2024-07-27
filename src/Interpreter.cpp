@@ -65,6 +65,12 @@ void Interpreter::visitVar(const Var& stmt) {
     environment->define(stmt.name.getLexeme(), std::make_pair(value, type));
 }
 
+void Interpreter::visitWhile(const While& stmt) {
+    while (isTruthy(evaluate(*stmt.condition), type)) {
+        execute(*stmt.body);
+    }
+}
+
 void Interpreter::visitAssign(const Assign& stmt) {
     std::shared_ptr<void> value = evaluate(*stmt.value);
     TokenType valueType = getType();
@@ -129,30 +135,36 @@ void Interpreter::visitBinary(const Binary& expr) {
     TokenType leftType = getType();
     std::shared_ptr<void> right = evaluate(*expr.right);
     TokenType rightType = getType();
+    
 
     switch (expr.op.getType()) {
         case TokenType::GREATER:
             checkNumberOperands(expr.op, left, right);
             result = std::make_shared<bool>(*std::static_pointer_cast<double>(left) > *std::static_pointer_cast<double>(right));
+            type = *std::static_pointer_cast<bool>(result) ? TokenType::TRUE : TokenType::FALSE;
             break;
         case TokenType::GREATER_EQUAL:
             checkNumberOperands(expr.op, left, right);
             result = std::make_shared<bool>(*std::static_pointer_cast<double>(left) >= *std::static_pointer_cast<double>(right));
+            type = *std::static_pointer_cast<bool>(result) ? TokenType::TRUE : TokenType::FALSE;
             break;
         case TokenType::LESS:
             checkNumberOperands(expr.op, left, right);
-            checkNumberOperands(expr.op, left, right);
             result = std::make_shared<bool>(*std::static_pointer_cast<double>(left) < *std::static_pointer_cast<double>(right));
+            type = *std::static_pointer_cast<bool>(result) ? TokenType::TRUE : TokenType::FALSE;
             break;
         case TokenType::LESS_EQUAL:
             checkNumberOperands(expr.op, left, right);
             result = std::make_shared<bool>(*std::static_pointer_cast<double>(left) <= *std::static_pointer_cast<double>(right));
+            type = *std::static_pointer_cast<bool>(result) ? TokenType::TRUE : TokenType::FALSE;
             break;
         case TokenType::BANG_EQUAL:
             result = std::make_shared<bool>(!isEqual(left, right, leftType, rightType));
+            type = *std::static_pointer_cast<bool>(result) ? TokenType::TRUE : TokenType::FALSE;
             break;
         case TokenType::EQUAL_EQUAL:
             result = std::make_shared<bool>(isEqual(left, right, leftType, rightType));
+            type = *std::static_pointer_cast<bool>(result) ? TokenType::TRUE : TokenType::FALSE;
             break;
         case TokenType::MINUS:
             checkNumberOperands(expr.op, left, right);
