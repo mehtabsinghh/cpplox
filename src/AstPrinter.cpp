@@ -8,11 +8,11 @@ void AstPrinter::print(const Expr& expr) {
 // Formats binary expressions with appropriate spaces and parentheses
 void AstPrinter::visitBinary(const Binary& expr) {
     result += "(";
-    result += expr.op.getLexeme(); // Add the operator
+    result += expr.op.getLexeme(); 
     result += " ";
-    expr.left->accept(*this); // Print the left side of the expression
-    result += " "; // Add space between the left and right expression
-    expr.right->accept(*this); // Print the right side of the expression
+    expr.left->accept(*this); 
+    result += " ";
+    expr.right->accept(*this);
     result += ")";
 }
 
@@ -30,18 +30,18 @@ void AstPrinter::visitLiteral(const Literal& expr) {
     } else if (expr.type == TokenType::NUMBER) {
         result += std::to_string(*(std::static_pointer_cast<double>(expr.value)));
     } else if (expr.type == TokenType::STRING) {
-        result += "\"" + *(std::static_pointer_cast<std::string>(expr.value)) + "\""; // Add quotes around strings
+        result += "\"" + *(std::static_pointer_cast<std::string>(expr.value)) + "\""; 
     } else {
-        result += "unknown"; // Handle unexpected types
+        result += "unknown"; 
     }
 }
 
 // Formats unary expressions with appropriate parentheses
 void AstPrinter::visitUnary(const Unary& expr) {
     result += "(";
-    result += expr.op.getLexeme(); // Add the operator
+    result += expr.op.getLexeme();
     result += " ";
-    expr.right->accept(*this); // Print the right side of the expression
+    expr.right->accept(*this);
     result += ")";
 }
 

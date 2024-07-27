@@ -40,8 +40,7 @@ void Interpreter::visitAssign(const Assign& stmt) {
     TokenType valueType = getType();
     environment->assign(stmt.name, std::make_pair(value, valueType));
 }
-// TO DO
-// ENVIRONMENT IS BEING PASSED AROUND AS EMPTY
+
 void Interpreter::visitVariable(const Variable& expr) {
     std::pair<std::shared_ptr<void>, TokenType> value = environment->get(expr.name);
     result = value.first;
