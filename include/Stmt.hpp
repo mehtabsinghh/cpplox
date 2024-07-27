@@ -4,12 +4,14 @@
 #include <memory>
 #include "Token.hpp"
 
+class Block ;
 class Expression ;
 class Print ;
 class Var ;
 
 class StmtVisitor {
 public:
+    virtual void visitBlock (const Block & Stmt) = 0;
     virtual void visitExpression (const Expression & Stmt) = 0;
     virtual void visitPrint (const Print & Stmt) = 0;
     virtual void visitVar (const Var & Stmt) = 0;
@@ -19,6 +21,18 @@ class Stmt {
 public:
     virtual ~Stmt() = default;
     virtual void accept(StmtVisitor& visitor) const = 0;
+};
+
+class Block  : public Stmt {
+public:
+    std::vector<Stmt> statements;
+
+    Block (std::vector<Stmt> statements)
+        : statements(statements) {}
+
+    void accept(StmtVisitor& visitor) const override {
+        return visitor.visitBlock (*this);
+    }
 };
 
 class Expression  : public Stmt {
