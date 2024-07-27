@@ -25,9 +25,9 @@ public:
 
 class Block  : public Stmt {
 public:
-    std::vector<Stmt> statements;
+    std::vector<std::shared_ptr<Stmt>> statements;
 
-    Block (std::vector<Stmt> statements)
+    Block (std::vector<std::shared_ptr<Stmt>> statements)
         : statements(statements) {}
 
     void accept(StmtVisitor& visitor) const override {

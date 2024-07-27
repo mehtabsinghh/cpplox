@@ -133,7 +133,7 @@ int main() {
         "Variable : Token name"
     });
     defineAst(outputDir, "Stmt", {
-        "Block : std::vector<Stmt> statements",
+        "Block : std::vector<std::shared_ptr<Stmt>> statements",
         "Expression : std::unique_ptr<Expr> expression",
         "Print : std::unique_ptr<Expr> expression",
         "Var : Token name, std::unique_ptr<Expr> initializer"

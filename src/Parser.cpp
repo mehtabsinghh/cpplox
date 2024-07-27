@@ -9,7 +9,7 @@ std::unique_ptr<Expr> Parser::expression() {
 }
 
 // Parses a declaration
-std::unique_ptr<Stmt> Parser::declaration() {
+std::shared_ptr<Stmt> Parser::declaration() {
     try {
         if (match({TokenType::VAR})) {
             return varDeclaration();
@@ -207,28 +207,30 @@ void Parser::synchronize() {
 }
 
 // Parses the input tokens and returns the resulting expression
-std::vector<std::unique_ptr<Stmt>> Parser::parse() {
-    std::vector<std::unique_ptr<Stmt>> statements;
+std::vector<std::shared_ptr<Stmt>> Parser::parse() {
+    std::vector<std::shared_ptr<Stmt>> statements;
     while (!isAtEnd()) {
         statements.emplace_back(declaration());
     }
     return statements;
 }
 
-std::unique_ptr<Stmt> Parser::statement() {
+std::shared_ptr<Stmt> Parser::statement() {
     if (match({TokenType::PRINT})) {
         return printStatement();
+    } else if (match({TokenType::LEFT_BRACE})) {
+        return std::make_unique<Block>(block());
     }
 
     return expressionStatement();
 }
 
-std::unique_ptr<Stmt> Parser::printStatement() {
+std::shared_ptr<Stmt> Parser::printStatement() {
     std::unique_ptr<Expr> value = expression();
     consume(TokenType::SEMICOLON, "Expect ';' after value.");
     return std::make_unique<Print>(std::move(value));
 }
-std::unique_ptr<Stmt> Parser::varDeclaration() {
+std::shared_ptr<Stmt> Parser::varDeclaration() {
     Token name = consume(TokenType::IDENTIFIER, "Expect variable name.");
 
     std::unique_ptr<Expr> initializer = nullptr;
@@ -240,10 +242,21 @@ std::unique_ptr<Stmt> Parser::varDeclaration() {
     return std::make_unique<Var>(name, std::move(initializer));
 }
 
-std::unique_ptr<Stmt> Parser::expressionStatement() {
+std::shared_ptr<Stmt> Parser::expressionStatement() {
     std::unique_ptr<Expr> expr = expression();
     consume(TokenType::SEMICOLON, "Expect ';' after expression.");
     return std::make_unique<Expression>(std::move(expr));
+}
+
+std::vector<std::shared_ptr<Stmt>> Parser::block() {
+    std::vector<std::shared_ptr<Stmt>> statements;
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        statements.emplace_back(declaration());
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
+    return statements;
 }
 
 std::unique_ptr<Expr> Parser::assignment() {
