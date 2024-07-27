@@ -216,6 +216,9 @@ std::vector<std::shared_ptr<Stmt>> Parser::parse() {
 }
 
 std::shared_ptr<Stmt> Parser::statement() {
+    if (match({TokenType::IF})) {
+        return ifStatement();
+    } else
     if (match({TokenType::PRINT})) {
         return printStatement();
     } else if (match({TokenType::LEFT_BRACE})) {
@@ -223,6 +226,20 @@ std::shared_ptr<Stmt> Parser::statement() {
     }
 
     return expressionStatement();
+}
+
+std::shared_ptr<Stmt> Parser::ifStatement() {
+    consume(TokenType::LEFT_PAREN, "Expect '(' after 'if'.");
+    std::unique_ptr<Expr> condition = expression();
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after if condition.");
+
+    std::shared_ptr<Stmt> thenBranch = statement();
+    std::shared_ptr<Stmt> elseBranch = nullptr;
+    if (match({TokenType::ELSE})) {
+        elseBranch = statement();
+    }
+
+    return std::make_shared<If>(std::move(condition), thenBranch, elseBranch);
 }
 
 std::shared_ptr<Stmt> Parser::printStatement() {
@@ -260,7 +277,7 @@ std::vector<std::shared_ptr<Stmt>> Parser::block() {
 }
 
 std::unique_ptr<Expr> Parser::assignment() {
-    std::unique_ptr<Expr> expr = equality();
+    std::unique_ptr<Expr> expr = logicalOr();
 
     if (match({TokenType::EQUAL})) {
         Token equals = previous();
@@ -271,6 +288,30 @@ std::unique_ptr<Expr> Parser::assignment() {
         }
 
         throw error(equals, "Invalid assignment target.");
+    }
+
+    return expr;
+}
+
+std::unique_ptr<Expr> Parser::logicalOr() {
+    std::unique_ptr<Expr> expr = logicalAnd();
+
+    while (match({TokenType::OR})) {
+        Token op = previous();
+        std::unique_ptr<Expr> right = logicalAnd();
+        expr = std::make_unique<Logical>(std::move(expr), op, std::move(right));
+    }
+
+    return expr;
+}
+
+std::unique_ptr<Expr> Parser::logicalAnd() {
+    std::unique_ptr<Expr> expr = equality();
+
+    while (match({TokenType::AND})) {
+        Token op = previous();
+        std::unique_ptr<Expr> right = equality();
+        expr = std::make_unique<Logical>(std::move(expr), op, std::move(right));
     }
 
     return expr;

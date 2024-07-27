@@ -38,6 +38,9 @@ private:
     std::shared_ptr<Stmt> varDeclaration();
     std::unique_ptr<Expr> assignment();
     std::vector<std::shared_ptr<Stmt>> block();
+    std::shared_ptr<Stmt> ifStatement();
+    std::unique_ptr<Expr> logicalOr();
+    std::unique_ptr<Expr> logicalAnd();
 
 };
 
