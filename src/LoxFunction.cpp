@@ -2,17 +2,17 @@
 #include "ReturnException.hpp"
 
 int LoxFunction::arity() {
-    return declaration.params.size();
+    return declaration->params.size();
 }
 
 std::pair<std::shared_ptr<void>, TokenType> LoxFunction::call(Interpreter& interpreter, std::vector<std::pair<std::shared_ptr<void>, TokenType>> arguments) {
-    auto environment = std::make_shared<Environment>(interpreter.globals);
-    for (int i = 0; i < declaration.params.size(); i++) {
-        environment->define(declaration.params[i].getLexeme(), arguments[i]);
+    auto environment = std::make_shared<Environment>(closure);
+    for (int i = 0; i < declaration->params.size(); i++) {
+        environment->define(declaration->params[i].getLexeme(), arguments[i]);
     }
 
     try {
-        interpreter.executeBlock(declaration.body, environment);
+        interpreter.executeBlock(declaration->body, environment);
     } catch (const ReturnException& e) {
         return {e.value, e.type};
     }
@@ -20,5 +20,5 @@ std::pair<std::shared_ptr<void>, TokenType> LoxFunction::call(Interpreter& inter
 }
 
 std::string LoxFunction::toString() const {
-    return "<fn " + declaration.name.getLexeme() + ">";
+    return "<fn " + declaration->name.getLexeme() + ">";
 }

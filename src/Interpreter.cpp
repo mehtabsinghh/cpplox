@@ -51,7 +51,7 @@ void Interpreter::visitExpression(const Expression& stmt) {
 }
 
 void Interpreter::visitFunction(const Function& stmt) {
-    std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(stmt);
+    std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(std::make_unique<Function>(stmt), environment);
     environment->define(stmt.name.getLexeme(), std::make_pair(function, TokenType::FUN));
 }
 
@@ -260,11 +260,11 @@ void Interpreter::visitCall(const Call& expr) {
         arguments.push_back(std::make_pair(getResult(), getType()));
     }
 
-    LoxFunction function = *std::static_pointer_cast<LoxFunction>(callee);
-    if (arguments.size() != function.arity()) {
-        throw RuntimeError(expr.paren, "Expected " + std::to_string(function.arity()) + " arguments but got " + std::to_string(arguments.size()) + ".");
+    std::shared_ptr<LoxFunction> function = std::static_pointer_cast<LoxFunction>(callee);
+    if (arguments.size() != function->arity()) {
+        throw RuntimeError(expr.paren, "Expected " + std::to_string(function->arity()) + " arguments but got " + std::to_string(arguments.size()) + ".");
     }
-    auto [returnValue, returnType] = function.call(*this, arguments);
+    auto [returnValue, returnType] = function->call(*this, arguments);
     result = returnValue;
     type = returnType;
 }
