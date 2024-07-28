@@ -1,5 +1,6 @@
+#ifndef LOX_FUNCTION_HPP
+#define LOX_FUNCTION_HPP
 #include "LoxCallable.hpp"
-
 
 class LoxFunction : public LoxCallable {
     const std::unique_ptr<Function> declaration;
@@ -11,3 +12,5 @@ public:
     std::pair<std::shared_ptr<void>, TokenType> call(Interpreter& interpreter, std::vector<std::pair<std::shared_ptr<void>, TokenType>> arguments) override;
     std::string toString() const override;
 };
+
+#endif
