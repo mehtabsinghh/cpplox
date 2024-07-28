@@ -320,7 +320,9 @@ std::string Interpreter::stringify(const std::shared_ptr<void>& object, TokenTyp
     if (type == TokenType::NIL) {
         return "nil";
     }
-
+    if (type == TokenType::FUN) {
+        return std::static_pointer_cast<LoxFunction>(object)->toString();
+    }
     if (type == TokenType::NUMBER) {
         auto num = *std::static_pointer_cast<double>(object);
         std::string text = std::to_string(num);
