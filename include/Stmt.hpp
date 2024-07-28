@@ -9,6 +9,7 @@ class Expression ;
 class Function ;
 class If ;
 class Print ;
+class Return ;
 class Var ;
 class While ;
 
@@ -19,6 +20,7 @@ public:
     virtual void visitFunction (const Function & Stmt) = 0;
     virtual void visitIf (const If & Stmt) = 0;
     virtual void visitPrint (const Print & Stmt) = 0;
+    virtual void visitReturn (const Return & Stmt) = 0;
     virtual void visitVar (const Var & Stmt) = 0;
     virtual void visitWhile (const While & Stmt) = 0;
 };
@@ -90,6 +92,19 @@ public:
 
     void accept(StmtVisitor& visitor) const override {
         return visitor.visitPrint (*this);
+    }
+};
+
+class Return  : public Stmt {
+public:
+    Token keyword;
+    std::unique_ptr<Expr> value;
+
+    Return (Token keyword, std::unique_ptr<Expr> value)
+        : keyword(keyword), value(std::move(value)) {}
+
+    void accept(StmtVisitor& visitor) const override {
+        return visitor.visitReturn (*this);
     }
 };
 

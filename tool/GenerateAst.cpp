@@ -141,6 +141,7 @@ int main() {
         "Function : Token name, std::vector<Token> params, std::vector<std::shared_ptr<Stmt>> body",
         "If : std::unique_ptr<Expr> condition, std::shared_ptr<Stmt> thenBranch, std::shared_ptr<Stmt> elseBranch",
         "Print : std::unique_ptr<Expr> expression",
+        "Return : Token keyword, std::unique_ptr<Expr> value",
         "Var : Token name, std::unique_ptr<Expr> initializer",
         "While : std::unique_ptr<Expr> condition, std::shared_ptr<Stmt> body"
     });
