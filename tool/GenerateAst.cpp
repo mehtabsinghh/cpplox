@@ -56,6 +56,7 @@ void defineType(std::ofstream& file, const std::string& baseName, const std::str
     }
 
     file << ")\n";
+    const std::string substring = "std::unique";
 
     // Initializer list
     file << "        : ";
@@ -63,7 +64,7 @@ void defineType(std::ofstream& file, const std::string& baseName, const std::str
         std::vector<std::string> fieldTokens = split(fields[i], " ");
         std::string fieldType = fieldTokens[0];
         std::string fieldName = fieldTokens[1];
-        if (fieldType.substr(0, 11) == "std::unique") {
+        if (fieldType.find(substring) != std::string::npos) {
             file << fieldName << "(std::move(" << fieldName << "))";
         } else {
             file << fieldName << "(" << fieldName << ")";
@@ -127,6 +128,7 @@ int main() {
     defineAst(outputDir, "Expr", {
         "Assign : Token name, std::unique_ptr<Expr> value",
         "Binary : std::unique_ptr<Expr> left, Token op, std::unique_ptr<Expr> right",
+        "Call : std::unique_ptr<Expr> callee, Token paren, std::vector<std::unique_ptr<Expr>> arguments",
         "Grouping : std::unique_ptr<Expr> expression",
         "Literal : TokenType type, std::shared_ptr<void> value",
         "Logical : std::unique_ptr<Expr> left, Token op, std::unique_ptr<Expr> right",
@@ -136,6 +138,7 @@ int main() {
     defineAst(outputDir, "Stmt", {
         "Block : std::vector<std::shared_ptr<Stmt>> statements",
         "Expression : std::unique_ptr<Expr> expression",
+        "Function : Token name, std::vector<Token> params, std::vector<std::shared_ptr<Stmt>> body",
         "If : std::unique_ptr<Expr> condition, std::shared_ptr<Stmt> thenBranch, std::shared_ptr<Stmt> elseBranch",
         "Print : std::unique_ptr<Expr> expression",
         "Var : Token name, std::unique_ptr<Expr> initializer",

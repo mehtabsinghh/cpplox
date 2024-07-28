@@ -6,6 +6,7 @@
 
 class Assign ;
 class Binary ;
+class Call ;
 class Grouping ;
 class Literal ;
 class Logical ;
@@ -16,6 +17,7 @@ class ExprVisitor {
 public:
     virtual void visitAssign (const Assign & Expr) = 0;
     virtual void visitBinary (const Binary & Expr) = 0;
+    virtual void visitCall (const Call & Expr) = 0;
     virtual void visitGrouping (const Grouping & Expr) = 0;
     virtual void visitLiteral (const Literal & Expr) = 0;
     virtual void visitLogical (const Logical & Expr) = 0;
@@ -53,6 +55,20 @@ public:
 
     void accept(ExprVisitor& visitor) const override {
         return visitor.visitBinary (*this);
+    }
+};
+
+class Call  : public Expr {
+public:
+    std::unique_ptr<Expr> callee;
+    Token paren;
+    std::vector<std::unique_ptr<Expr>> arguments;
+
+    Call (std::unique_ptr<Expr> callee, Token paren, std::vector<std::unique_ptr<Expr>> arguments)
+        : callee(std::move(callee)), paren(paren), arguments(std::move(arguments)) {}
+
+    void accept(ExprVisitor& visitor) const override {
+        return visitor.visitCall (*this);
     }
 };
 

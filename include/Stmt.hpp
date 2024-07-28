@@ -6,6 +6,7 @@
 
 class Block ;
 class Expression ;
+class Function ;
 class If ;
 class Print ;
 class Var ;
@@ -15,6 +16,7 @@ class StmtVisitor {
 public:
     virtual void visitBlock (const Block & Stmt) = 0;
     virtual void visitExpression (const Expression & Stmt) = 0;
+    virtual void visitFunction (const Function & Stmt) = 0;
     virtual void visitIf (const If & Stmt) = 0;
     virtual void visitPrint (const Print & Stmt) = 0;
     virtual void visitVar (const Var & Stmt) = 0;
@@ -48,6 +50,20 @@ public:
 
     void accept(StmtVisitor& visitor) const override {
         return visitor.visitExpression (*this);
+    }
+};
+
+class Function  : public Stmt {
+public:
+    Token name;
+    std::vector<Token> params;
+    std::vector<std::shared_ptr<Stmt>> body;
+
+    Function (Token name, std::vector<Token> params, std::vector<std::shared_ptr<Stmt>> body)
+        : name(name), params(params), body(body) {}
+
+    void accept(StmtVisitor& visitor) const override {
+        return visitor.visitFunction (*this);
     }
 };
 
