@@ -14,15 +14,16 @@ T* get_if(const std::shared_ptr<void>& ptr) {
 }
 
 class Interpreter : public ExprVisitor, StmtVisitor {
-    std::shared_ptr<Environment> environment = std::make_shared<Environment>();
-    std::shared_ptr<void> result;
 public:
+    const std::shared_ptr<Environment> globals = std::make_shared<Environment>();
+    Interpreter();
     void visitBinary (const Binary& expr) override;
     void visitGrouping (const Grouping& expr) override;
     void visitLiteral (const Literal& expr) override;
     void visitUnary (const Unary& expr) override;
     void interpret(const std::vector<std::shared_ptr<Stmt>>& statements);
     void visitExpression(const Expression& stmt) override;
+    void visitFunction(const Function& stmt) override;
     void visitPrint(const Print& stmt) override;
     void visitVar(const Var& stmt) override;
     void visitVariable(const Variable& expr) override;
@@ -31,11 +32,15 @@ public:
     void visitIf(const If& stmt) override;
     void visitLogical(const Logical& expr) override;
     void visitWhile(const While& stmt) override;
+    void visitCall(const Call& expr) override;
     void executeBlock(std::vector<std::shared_ptr<Stmt>> statements, std::shared_ptr<Environment> environment);
     std::shared_ptr<void>& getResult();
     TokenType getType();
 private:
     // Global environment for the interpreter
+    
+    std::shared_ptr<Environment> environment = globals;
+    std::shared_ptr<void> result;
     TokenType type;
     std::shared_ptr<void> evaluate(const Expr& expr);
     bool isTruthy(const std::shared_ptr<void>& object, TokenType type);

@@ -1,7 +1,13 @@
 #include "Interpreter.hpp"
 #include "RuntimeError.hpp"
 #include "Lox.hpp"
+#include "LoxFunction.hpp"
+#include "Clock.hpp"
 #include <iostream>
+
+Interpreter::Interpreter() {
+    globals->define("clock", std::make_pair(std::make_shared<Clock>(), TokenType::FUN));
+}
 
 void Interpreter::visitLiteral(const Literal& expr) {
     result = expr.value;
@@ -41,6 +47,11 @@ std::shared_ptr<void> Interpreter::evaluate(const Expr& expr) {
 
 void Interpreter::visitExpression(const Expression& stmt) {
     evaluate(*stmt.expression);
+}
+
+void Interpreter::visitFunction(const Function& stmt) {
+    std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(stmt);
+    environment->define(stmt.name.getLexeme(), std::make_pair(function, TokenType::FUN));
 }
 
 void Interpreter::visitIf(const If& stmt) {
@@ -191,23 +202,47 @@ void Interpreter::visitBinary(const Binary& expr) {
     }
 }
 
+void Interpreter::visitCall(const Call& expr) {
+    std::shared_ptr<void> callee = evaluate(*expr.callee);
+    TokenType calleeType = getType();
+    std::vector<std::pair<std::shared_ptr<void>, TokenType>> arguments;
+
+    for (const auto& argument : expr.arguments) {
+        arguments.push_back(std::make_pair(evaluate(*argument), getType()));
+    }
+
+    //if (calleeType != TokenType::FUN || calleeType != TokenType::CLASS) {
+     //   throw RuntimeError(expr.paren, "Can only call functions and classes.");
+   // }
+
+    LoxFunction function = *std::static_pointer_cast<LoxFunction>(callee);
+    if (arguments.size() != function.arity()) {
+        throw RuntimeError(expr.paren, "Expected " + std::to_string(function.arity()) + " arguments but got " + std::to_string(arguments.size()) + ".");
+    }
+    auto [returnValue, returnType] = function.call(*this, arguments);
+    result = returnValue;
+    type = returnType;
+}
+
 bool Interpreter::isEqual(const std::shared_ptr<void>& a, const std::shared_ptr<void>& b, TokenType aType, TokenType bType) {
+    if (aType != bType) 
+        return false;
+    if (aType == TokenType::TRUE || aType == TokenType::FALSE) 
+        return aType == bType;
     if (a == nullptr && b == nullptr) {
+        std::cout << "Both are null" << std::endl;
         return true;
     }
-    if (a == nullptr) {
+    if (a == nullptr) 
         return false;
-    }
-
-    if (aType != bType) {
-        return false;
-    }
-
-    if (aType == TokenType::NUMBER) {
+    
+    if (aType == TokenType::NUMBER) 
         return *std::static_pointer_cast<double>(a) == *std::static_pointer_cast<double>(b);
-    } else if (aType == TokenType::STRING) {
+    if (aType == TokenType::STRING) 
         return *std::static_pointer_cast<std::string>(a) == *std::static_pointer_cast<std::string>(b);
-    }
+    if (aType == TokenType::TRUE || aType == TokenType::FALSE) 
+        return *std::static_pointer_cast<bool>(a) == *std::static_pointer_cast<bool>(b);
+    
 
     return false;
 }
