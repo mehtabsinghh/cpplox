@@ -1,4 +1,5 @@
 #include "LoxFunction.hpp"
+#include "ReturnException.hpp"
 
 int LoxFunction::arity() {
     return declaration.params.size();
@@ -10,7 +11,11 @@ std::pair<std::shared_ptr<void>, TokenType> LoxFunction::call(Interpreter& inter
         environment->define(declaration.params[i].getLexeme(), arguments[i]);
     }
 
-    interpreter.executeBlock(declaration.body, environment);
+    try {
+        interpreter.executeBlock(declaration.body, environment);
+    } catch (const ReturnException& e) {
+        return {e.value, e.type};
+    }
     return {nullptr, TokenType::NIL};
 }
 
