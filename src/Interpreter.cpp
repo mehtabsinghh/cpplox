@@ -184,8 +184,15 @@ void Interpreter::visitBinary(const Binary& expr) {
             break;
         case TokenType::PLUS:
             checkNumberOperands(expr.op, left, right);
-            result = std::make_shared<double>(*std::static_pointer_cast<double>(left) + *std::static_pointer_cast<double>(right));
-            type = TokenType::NUMBER;
+            if (leftType == TokenType::NUMBER && rightType == TokenType::NUMBER) {
+                // If both are numbers, add them
+                result = std::make_shared<double>(*std::static_pointer_cast<double>(left) + *std::static_pointer_cast<double>(right));
+                type = TokenType::NUMBER;
+            } else if (leftType == TokenType::STRING && rightType == TokenType::STRING) {
+                // If both are strings, concatenate them
+                result = std::make_shared<std::string>(*std::static_pointer_cast<std::string>(left) + *std::static_pointer_cast<std::string>(right));
+                type = TokenType::STRING;
+            }
             break;
         case TokenType::SLASH:
             checkNumberOperands(expr.op, left, right);
