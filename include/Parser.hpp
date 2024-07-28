@@ -43,7 +43,9 @@ private:
     std::unique_ptr<Expr> logicalAnd();
     std::shared_ptr<Stmt> whileStatement();
     std::shared_ptr<Stmt> forStatement();
-
+    std::unique_ptr<Expr> call();
+    std::unique_ptr<Expr> finishCall(std::unique_ptr<Expr> callee);
+    std::shared_ptr<Stmt> function(const std::string& kind);
 };
 
 #endif
