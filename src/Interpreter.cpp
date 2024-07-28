@@ -4,6 +4,7 @@
 #include "LoxFunction.hpp"
 #include "Clock.hpp"
 #include <iostream>
+#include "ReturnException.hpp"
 
 Interpreter::Interpreter() {
     globals->define("clock", std::make_pair(std::make_shared<Clock>(), TokenType::FUN));
@@ -65,6 +66,14 @@ void Interpreter::visitIf(const If& stmt) {
 void Interpreter::visitPrint(const Print& stmt) {
     std::shared_ptr<void> value = evaluate(*stmt.expression);
     std::cout << stringify(value, type) << std::endl;
+}
+
+void Interpreter::visitReturn(const Return& stmt) {
+    std::shared_ptr<void> value = nullptr;
+    if (stmt.value != nullptr) {
+        value = evaluate(*stmt.value);
+    }
+    throw ReturnException(value, type);
 }
 
 void Interpreter::visitVar(const Var& stmt) {
@@ -209,18 +218,47 @@ void Interpreter::visitBinary(const Binary& expr) {
     }
 }
 
+void outputType(TokenType type) {
+    switch (type) {
+        case TokenType::NUMBER:
+            std::cout << "NUMBER" << std::endl;
+            break;
+        case TokenType::STRING:
+            std::cout << "STRING" << std::endl;
+            break;
+        case TokenType::TRUE:
+            std::cout << "TRUE" << std::endl;
+            break;
+        case TokenType::FALSE:
+            std::cout << "FALSE" << std::endl;
+            break;
+        case TokenType::NIL:
+            std::cout << "NIL" << std::endl;
+            break;
+        case TokenType::FUN:
+            std::cout << "FUN" << std::endl;
+            break;
+        case TokenType::CLASS:
+            std::cout << "CLASS" << std::endl;
+            break;
+        default:
+            break;
+    }
+}
+
 void Interpreter::visitCall(const Call& expr) {
     std::shared_ptr<void> callee = evaluate(*expr.callee);
     TokenType calleeType = getType();
     std::vector<std::pair<std::shared_ptr<void>, TokenType>> arguments;
 
-    for (const auto& argument : expr.arguments) {
-        arguments.push_back(std::make_pair(evaluate(*argument), getType()));
+    if (calleeType != TokenType::FUN && calleeType != TokenType::CLASS) {
+       throw RuntimeError(expr.paren, "Can only call functions and classes.");
     }
 
-    //if (calleeType != TokenType::FUN || calleeType != TokenType::CLASS) {
-     //   throw RuntimeError(expr.paren, "Can only call functions and classes.");
-   // }
+    for (const auto& argument : expr.arguments) {
+        evaluate(*argument);
+        arguments.push_back(std::make_pair(getResult(), getType()));
+    }
 
     LoxFunction function = *std::static_pointer_cast<LoxFunction>(callee);
     if (arguments.size() != function.arity()) {

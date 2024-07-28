@@ -33,6 +33,7 @@ public:
     void visitLogical(const Logical& expr) override;
     void visitWhile(const While& stmt) override;
     void visitCall(const Call& expr) override;
+    void visitReturn(const Return& stmt) override;
     void executeBlock(std::vector<std::shared_ptr<Stmt>> statements, std::shared_ptr<Environment> environment);
     std::shared_ptr<void>& getResult();
     TokenType getType();
