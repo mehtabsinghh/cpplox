@@ -46,6 +46,7 @@ private:
     std::unique_ptr<Expr> call();
     std::unique_ptr<Expr> finishCall(std::unique_ptr<Expr> callee);
     std::shared_ptr<Stmt> function(const std::string& kind);
+    std::shared_ptr<Stmt> returnStatement();
 };
 
 #endif
