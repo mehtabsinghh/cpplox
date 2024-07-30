@@ -11,8 +11,8 @@ To build the OrderBook project, follow these steps:
 1. **Clone the repository:**
 
    ```bash
-   git clone <https://github.com/mehtabsinghh/cpplox>
-   cd OrderBook
+   git clone https://github.com/mehtabsinghh/cpplox
+   cd cpplox
    ```
 2. **Create a build directory:**
    ```bash
@@ -29,7 +29,7 @@ To build the OrderBook project, follow these steps:
    cmake --build . --config release
    ```
 
-After building the project, you can run the executable with a filename or without which puts you into a repl:
+After building the project, you can run the executable alone to use the repl or add a filepath:
    ```bash
-   ./cpplox
+   ./cpplox filepath
    ```
