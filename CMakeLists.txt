@@ -19,4 +19,17 @@ set(SOURCES
     src/LoxFunction.cpp
     # Add more source files here if needed
 )
+
+# Add the Boost.Test library
+find_package(Boost 1.70.0 REQUIRED COMPONENTS unit_test_framework)
+include_directories(${Boost_INCLUDE_DIRS})
+
+# Add the executable for testing
+add_executable(runUnitTests test/test.cpp)
+target_link_libraries(runUnitTests ${Boost_LIBRARIES})
+
+# Enable testing
+enable_testing()
+add_test(NAME runUnitTests COMMAND runUnitTests)
+
 add_executable(cpplox ${SOURCES})
