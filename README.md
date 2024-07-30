@@ -2,7 +2,7 @@
 
 ## Overview
 
-Creating an interpreter using C++ for a language called Lox
+Creating an interpreter using C++ for a language called Lox, currently there is no support for classes.
 
 ## Build Instructions
 
