@@ -5,14 +5,6 @@
 #include "Stmt.hpp"
 #include "Environment.hpp"
 
-template<typename T>
-T* get_if(const std::shared_ptr<void>& ptr) {
-    if (ptr && typeid(T) == typeid(*static_cast<T*>(ptr.get()))) {
-        return static_cast<T*>(ptr.get());
-    }
-    return nullptr;
-}
-
 class Interpreter : public ExprVisitor, StmtVisitor {
 public:
     const std::shared_ptr<Environment> globals = std::make_shared<Environment>();
@@ -46,8 +38,8 @@ private:
     std::shared_ptr<void> evaluate(const Expr& expr);
     bool isTruthy(const std::shared_ptr<void>& object, TokenType type);
     bool isEqual(const std::shared_ptr<void>& a, const std::shared_ptr<void>& b, TokenType aType, TokenType bType);
-    void checkNumberOperand(const Token op, const std::shared_ptr<void>& operand);
-    void checkNumberOperands(const Token op, const std::shared_ptr<void>& left, const std::shared_ptr<void>& right);
+    void checkNumberOperand(const Token op, const TokenType type);
+    void checkNumberOperands(const Token op, const TokenType leftType, const TokenType rightType);
     std::string stringify(const std::shared_ptr<void>& object, TokenType type);
     void execute(const Stmt& stmt);
 
