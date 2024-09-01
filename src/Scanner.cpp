@@ -1,6 +1,7 @@
 #include "Scanner.hpp"
 #include "Lox.hpp"
 
+// Map of reserved keywords and their token types
 const std::unordered_map<std::string, TokenType> Scanner::keywords = {
     {"and",    TokenType::AND},
     {"class",  TokenType::CLASS},
@@ -129,18 +130,18 @@ void Scanner::scanToken() {
     }
 }
 
-void Scanner::addToken(TokenType type) {
+void Scanner::addToken(const TokenType type) {
     addToken(type, nullptr);
 }
 
-void Scanner::addToken(TokenType type, std::shared_ptr<void> literal) {
+void Scanner::addToken(const TokenType type, std::shared_ptr<void> literal) {
     // Adds a token to the token list
     std::string text = source.substr(start, current - start);
     Token token(type, text, literal, line);
     tokens.emplace_back(token);
 }
 
-bool Scanner::match(char expected) {
+bool Scanner::match(const char expected) {
     // Checks if the current character matches the expected character
     if (isAtEnd()) return false;
     if (source[current] != expected) return false;
@@ -162,6 +163,7 @@ void Scanner::string() {
         advance();
     }
 
+    // Unterminated string
     if (isAtEnd()) {
         Lox::error(line, "Unterminated string.");
         return;
@@ -189,6 +191,7 @@ void Scanner::number() {
         // Consume the "."
         advance();
 
+        // Consume the fractional part
         while (isDigit(peek())) advance();
     }
 
@@ -208,7 +211,7 @@ bool Scanner::isAlpha(const char c) const {
            c == '_';
 }
 
-bool Scanner::isAlphaNumeric(char c) const {
+bool Scanner::isAlphaNumeric(const char c) const {
     // Checks if the character is an alphabet character or a digit
     return isAlpha(c) || isDigit(c);
 }
