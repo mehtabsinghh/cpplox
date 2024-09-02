@@ -4,8 +4,8 @@
 #include <vector>
 #include <memory>
 
-// Trim function to remove leading and trailing spaces
 std::string trim(const std::string& str) {
+    // Trim function to remove leading and trailing spaces
     size_t first = str.find_first_not_of(' ');
     if (std::string::npos == first) {
         return str;
@@ -15,6 +15,7 @@ std::string trim(const std::string& str) {
 }
 
 std::vector<std::string> split(const std::string& str, const std::string& delim) {
+    // Split a string into tokens based on a delimiter
     std::vector<std::string> tokens;
     size_t start = 0;
     size_t end = str.find(delim);
@@ -28,8 +29,11 @@ std::vector<std::string> split(const std::string& str, const std::string& delim)
 }
 
 void defineVisitor(std::ofstream& file, const std::string& baseName, const std::vector<std::string>& types) {
+    // Visitor interface
     file << "class " << baseName << "Visitor {\n";
     file << "public:\n";
+
+    // Visit methods
     for (const std::string& type : types) {
         const std::string typeName = type.substr(0, type.find(":"));
         file << "    virtual void visit" << typeName << "(const " << typeName << "& " << baseName << ") = 0;\n";
@@ -39,12 +43,16 @@ void defineVisitor(std::ofstream& file, const std::string& baseName, const std::
 }
 
 void defineType(std::ofstream& file, const std::string& baseName, const std::string& className, const std::string& fieldList) {
+    // Class definition
     file << "class " << className << " : public " << baseName << " {\n";
     file << "public:\n";
+
+    // Fields
     std::vector<std::string> fields = split(fieldList, ", ");
     for (const std::string& field : fields) {
         file << "    " << field << ";\n";
     }
+
     // Constructor
     file << "\n";
     file << "    " << className << "(";
@@ -56,7 +64,6 @@ void defineType(std::ofstream& file, const std::string& baseName, const std::str
     }
 
     file << ")\n";
-    const std::string substring = "std::unique";
 
     // Initializer list
     file << "        : ";
@@ -64,9 +71,11 @@ void defineType(std::ofstream& file, const std::string& baseName, const std::str
         std::vector<std::string> fieldTokens = split(fields[i], " ");
         std::string fieldType = fieldTokens[0];
         std::string fieldName = fieldTokens[1];
-        if (fieldType.find(substring) != std::string::npos) {
+        if (fieldType.find("std::unique") != std::string::npos) {
+            // Move the unique pointer
             file << fieldName << "(std::move(" << fieldName << "))";
         } else {
+            // Copy the shared pointer
             file << fieldName << "(" << fieldName << ")";
         }
         if (i != fields.size() - 1) {
@@ -87,6 +96,8 @@ void defineType(std::ofstream& file, const std::string& baseName, const std::str
 void defineAst(const std::string& outputDir, const std::string& baseName, const std::vector<std::string>& types) {
     std::string path = outputDir + "/" + baseName + ".hpp";
     std::ofstream file(path);
+
+    // Include guards
     file << "#ifndef " << baseName << "_HPP\n";
     file << "#define " << baseName << "_HPP\n";
     file << "\n";
@@ -125,6 +136,8 @@ void defineAst(const std::string& outputDir, const std::string& baseName, const 
 
 int main() {
     std::string outputDir = "../include";
+
+    // Define the Expr AST class
     defineAst(outputDir, "Expr", {
         "Assign : Token name, std::unique_ptr<Expr> value",
         "Binary : std::unique_ptr<Expr> left, Token op, std::unique_ptr<Expr> right",
@@ -135,6 +148,8 @@ int main() {
         "Unary : Token op, std::unique_ptr<Expr> right",
         "Variable : Token name"
     });
+
+    // Define the Stmt AST class
     defineAst(outputDir, "Stmt", {
         "Block : std::vector<std::shared_ptr<Stmt>> statements",
         "Expression : std::unique_ptr<Expr> expression",
