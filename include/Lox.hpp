@@ -9,7 +9,6 @@
 #include "Token.hpp"
 #include "Scanner.hpp"
 #include "Parser.hpp"
-#include "AstPrinter.hpp"
 #include "RuntimeError.hpp"
 #include "Interpreter.hpp"
 

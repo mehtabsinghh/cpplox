@@ -1,5 +1,4 @@
 #include "Lox.hpp"
-#include "AstPrinter.hpp"
 
 int main(int argc, char* argv[]) {
     Lox lox;
