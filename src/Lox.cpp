@@ -37,13 +37,17 @@ void Lox::runPrompt() {
 }
 
 void Lox::run(const std::string& source) {
+    // Scans the source code
     Scanner scanner(source);
     std::vector<Token> tokens = scanner.scanTokens();
 
+    // Parses the tokens
     Parser parser(tokens);
     std::vector<std::shared_ptr<Stmt>> statements = parser.parse();
 
-    if (hadError) return;
+    if (hadError) return; // Stop if there was a syntax error
+
+    // Runs the interpreter
     Interpreter interpreter;
     interpreter.interpret(statements);
 }
