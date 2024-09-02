@@ -7,6 +7,16 @@
 #include <utility>
 #include "Interpreter.hpp"
 
+/**
+ * @class LoxCallable
+ * @brief Abstract class for Lox callables
+ * 
+ * The LoxCallable class is an abstract class for Lox callables, which are
+ * objects that can be called like functions in Lox code. It provides a
+ * method for getting the arity of the callable, a method for calling the
+ * callable with a list of arguments, and a method for converting the
+ * callable to a string.
+ */
 class LoxCallable {
 public:
     virtual int arity() = 0;
