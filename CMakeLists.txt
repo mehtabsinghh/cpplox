@@ -12,7 +12,6 @@ set(SOURCES
     src/Lox.cpp 
     src/Scanner.cpp 
     src/Token.cpp
-    src/AstPrinter.cpp
     src/Parser.cpp
     src/Interpreter.cpp
     src/Environment.cpp
