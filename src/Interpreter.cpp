@@ -22,6 +22,10 @@ void Interpreter::interpret(const std::vector<std::shared_ptr<Stmt>>& statements
     }
 }
 
+void Interpreter::execute(const Stmt& stmt) {
+    stmt.accept(*this);
+}
+
 void Interpreter::visitBinary(const Binary& expr) {
     // Evaluate the left and right expressions
     std::shared_ptr<void> left = evaluate(*expr.left);
@@ -371,9 +375,4 @@ std::string Interpreter::stringify(const std::shared_ptr<void>& object, TokenTyp
 
     return "nil";
 }
-
-void Interpreter::execute(const Stmt& stmt) {
-    stmt.accept(*this);
-}
-
 
