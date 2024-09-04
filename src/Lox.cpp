@@ -15,7 +15,9 @@ void Lox::runFile(const std::string& path) {
     }
 
     // Stores bytes into vector and runs it
-    std::vector<char> bytes((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());   
+    std::istreambuf_iterator<char> begin(file);
+    std::istreambuf_iterator<char> end;
+    std::vector<char> bytes(begin, end);
     file.close();
     run(std::string(bytes.begin(), bytes.end()));
 
