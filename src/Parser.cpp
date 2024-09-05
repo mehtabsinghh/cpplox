@@ -318,6 +318,21 @@ std::unique_ptr<Expr> Parser::unary() {
     return call();
 }
 
+std::unique_ptr<Expr> Parser::call() {
+    // Parse the primary expression
+    std::unique_ptr<Expr> expr = primary();
+
+    // Check for function calls
+    while (true) {
+        if (match({TokenType::LEFT_PAREN})) {
+            expr = finishCall(std::move(expr));
+        } else {
+            break;
+        }
+    }
+
+    return expr;
+}
 
 std::unique_ptr<Expr> Parser::primary() {
     auto nilptr = std::shared_ptr<void>();
@@ -355,22 +370,6 @@ std::unique_ptr<Expr> Parser::primary() {
 
     // If none of the above cases match, throw an error
     throw error(peek(), "Expect expression.");
-}
-
-std::unique_ptr<Expr> Parser::call() {
-    // Parse the primary expression
-    std::unique_ptr<Expr> expr = primary();
-
-    // Check for function calls
-    while (true) {
-        if (match({TokenType::LEFT_PAREN})) {
-            expr = finishCall(std::move(expr));
-        } else {
-            break;
-        }
-    }
-
-    return expr;
 }
 
 std::unique_ptr<Expr> Parser::finishCall(std::unique_ptr<Expr> callee) {

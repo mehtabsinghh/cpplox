@@ -26,6 +26,11 @@ void Interpreter::execute(const Stmt& stmt) {
     stmt.accept(*this);
 }
 
+std::shared_ptr<void> Interpreter::evaluate(const Expr& expr) {
+    expr.accept(*this);
+    return result;
+}
+
 void Interpreter::visitBinary(const Binary& expr) {
     // Evaluate the left and right expressions
     std::shared_ptr<void> left = evaluate(*expr.left);
@@ -235,15 +240,26 @@ void Interpreter::visitAssign(const Assign& stmt) {
     environment->assign(stmt.name, std::make_pair(value, valueType));
 }
 
-std::shared_ptr<void> Interpreter::evaluate(const Expr& expr) {
-    // Visit the expression and return the result
-    expr.accept(*this);
-    return result;
-}
-
 void Interpreter::visitBlock(const Block& stmt) {
     // Execute the block of statements within a new environment
     executeBlock(stmt.statements, std::make_shared<Environment>(environment));
+}
+
+void Interpreter::executeBlock(std::vector<std::shared_ptr<Stmt>> statements, std::shared_ptr<Environment> environment) {
+    std::shared_ptr<Environment> previous = this->environment;
+    try {
+        // Execute the block of statements within the given environment
+        this->environment = environment;
+        for (const auto& statement : statements) {
+            execute(*statement);
+        }
+    } catch (const RuntimeError& error) {
+        // Catch any runtime errors and print them
+        Lox::runtimeError(error);
+    }
+
+    // Restore the previous environment
+    this->environment = previous;
 }
 
 void Interpreter::visitIf(const If& stmt) {
@@ -271,23 +287,6 @@ void Interpreter::visitReturn(const Return& stmt) {
 
     // Throw a return exception to extit the function
     throw ReturnException(value, type);
-}
-
-void Interpreter::executeBlock(std::vector<std::shared_ptr<Stmt>> statements, std::shared_ptr<Environment> environment) {
-    std::shared_ptr<Environment> previous = this->environment;
-    try {
-        // Execute the block of statements within the given environment
-        this->environment = environment;
-        for (const auto& statement : statements) {
-            execute(*statement);
-        }
-    } catch (const RuntimeError& error) {
-        // Catch any runtime errors and print them
-        Lox::runtimeError(error);
-    }
-
-    // Restore the previous environment
-    this->environment = previous;
 }
 
 std::shared_ptr<void>& Interpreter::getResult() {
