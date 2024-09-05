@@ -14,19 +14,6 @@ std::vector<std::shared_ptr<Stmt>> Parser::parse() {
     return statements;
 }
 
-std::shared_ptr<Stmt> Parser::statement() {
-    // Check for different types of statements
-    if (match({TokenType::FOR})) return forStatement();
-    if (match({TokenType::IF})) return ifStatement();
-    if (match({TokenType::PRINT})) return printStatement();
-    if (match({TokenType::RETURN})) return returnStatement();
-    if (match({TokenType::WHILE})) return whileStatement();
-    if (match({TokenType::LEFT_BRACE})) return std::make_shared<Block>(block());
-
-    // If no other statement type matches, parse an expression statement
-    return expressionStatement();
-}
-
 // Parses a declaration
 std::shared_ptr<Stmt> Parser::declaration() {
     try {
@@ -40,6 +27,19 @@ std::shared_ptr<Stmt> Parser::declaration() {
         synchronize();
         return nullptr;
     }
+}
+
+std::shared_ptr<Stmt> Parser::statement() {
+    // Check for different types of statements
+    if (match({TokenType::FOR})) return forStatement();
+    if (match({TokenType::IF})) return ifStatement();
+    if (match({TokenType::PRINT})) return printStatement();
+    if (match({TokenType::RETURN})) return returnStatement();
+    if (match({TokenType::WHILE})) return whileStatement();
+    if (match({TokenType::LEFT_BRACE})) return std::make_shared<Block>(block());
+
+    // If no other statement type matches, parse an expression statement
+    return expressionStatement();
 }
 
 std::vector<std::shared_ptr<Stmt>> Parser::block() {
