@@ -195,7 +195,8 @@ void Scanner::number() {
         while (isDigit(peek())) advance();
     }
 
-    addToken(TokenType::NUMBER, std::make_shared<double>(std::stod(source.substr(start, current - start))));
+    double value = std::stod(source.substr(start, current - start));
+    addToken(TokenType::NUMBER, std::make_shared<double>(value));
 }
 
 char Scanner::peekNext() const {
