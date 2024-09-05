@@ -182,13 +182,6 @@ std::shared_ptr<Stmt> Parser::printStatement() {
     return std::make_unique<Print>(std::move(value));
 }
 
-std::shared_ptr<Stmt> Parser::expressionStatement() {
-    // Parse the expression and consume the semicolon
-    std::unique_ptr<Expr> expr = expression();
-    consume(TokenType::SEMICOLON, "Expect ';' after expression.");
-    return std::make_unique<Expression>(std::move(expr));
-}
-
 std::shared_ptr<Stmt> Parser::varDeclaration() {
     // Parse the variable name
     Token name = consume(TokenType::IDENTIFIER, "Expect variable name.");
@@ -202,6 +195,13 @@ std::shared_ptr<Stmt> Parser::varDeclaration() {
     // Consume the semicolon and return the Var statement
     consume(TokenType::SEMICOLON, "Expect ';' after variable declaration.");
     return std::make_unique<Var>(name, std::move(initializer));
+}
+
+std::shared_ptr<Stmt> Parser::expressionStatement() {
+    // Parse the expression and consume the semicolon
+    std::unique_ptr<Expr> expr = expression();
+    consume(TokenType::SEMICOLON, "Expect ';' after expression.");
+    return std::make_unique<Expression>(std::move(expr));
 }
 
 std::unique_ptr<Expr> Parser::expression() {
